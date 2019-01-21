@@ -121,33 +121,50 @@ class Process(object):
 
     def find_peak_after_fft(self):
         self.peak_time = []
-        THRESHOLD = 5
+        THRESHOLD = 10
         for i in range(self.SAMPLE_TIME):
-            for j in range(3):
-                if self.acc_fft_max[j][i] > THRESHOLD:
-                    #左闭右开
-                    start = self.acc_time[i*self.SAMPLE_LEN]
-                    end = self.acc_time[(i+1)*self.SAMPLE_LEN]
-                    self.peak_time.append([start, end])
-                    break
+            isPeak = False
+            #x,y,z轴中有高频能量
+            if self.acc_fft_bucket[0][2][i] > THRESHOLD:
+                isPeak = True
+            elif self.acc_fft_bucket[1][2][i] > THRESHOLD:
+                isPeak = True
+            elif self.acc_fft_bucket[2][2][i] > THRESHOLD:
+                isPeak = True
+            
+            if isPeak:
+                start = self.acc_time[i*self.SAMPLE_LEN]
+                end = self.acc_time[(i+1)*self.SAMPLE_LEN]
+                self.peak_time.append([start, end])
+        # self.peak_time = []
+        # THRESHOLD = 5
+        # for i in range(self.SAMPLE_TIME):
+        #     for j in range(3):
+        #         if self.acc_fft_max[j][i] > THRESHOLD:
+        #             #左闭右开
+        #             start = self.acc_time[i*self.SAMPLE_LEN]
+        #             end = self.acc_time[(i+1)*self.SAMPLE_LEN]
+        #             self.peak_time.append([start, end])
+        #             break
 
     def refine_acc(self):
         print('refine')
 
 
 #initialize
-left = Process('data/log-16-WatchL.txt')
+left = Process('data/log-palm-WatchL.txt')
 left.read_data()
 left.preprocess_timing_gap()
 # left.show_single_plot()
-right = Process('data/log-16-WatchR.txt')
+right = Process('data/log-palm-WatchR.txt')
 right.read_data()
 right.preprocess_timing_gap()
 # right.show_single_plot()
 
 #address the start timing gap
+FILE_SHIFT = 0.05
 TIMING_DIFF = left.time[0] - right.time[0]
-right.time = [time+TIMING_DIFF for time in right.time]
+right.time = [time+TIMING_DIFF-FILE_SHIFT for time in right.time]
 
 #mix two datagram: original data visualization
 fig, axs = plt.subplots(9, 1)
@@ -195,15 +212,14 @@ right.frequency_transform()
 right.frequency_bucket_show()
 
 
-
 #find peak by data after fft
-# def overlap(x, y):
-#     if x[1] < y[0]:
-#         return -1
-#     elif x[0] > y[1]:
-#         return 1
-#     else:#overlap
-#         return 0
+def overlap(x, y):
+    if x[1] < y[0]:
+        return -1
+    elif x[0] > y[1]:
+        return 1
+    else:#overlap
+        return 0
 
 # def peak_classification(t_left, t_right):
 #     left_start = left.time.index(t_left[0])
@@ -249,27 +265,81 @@ right.frequency_bucket_show()
 #         if left_is_positive == True and right_is_positive == False:
 #             print("fist to fist")
 
+left.find_peak_after_fft()
+right.find_peak_after_fft()
+# find overlap peak
+left_index = 0
+right_index = 0
+overlap_count = 0
+#display use array
+# index_array = np.arange(0, 50)
+cover_array = np.zeros(len(left.time))
+#store file
+training_filename = 'training/palm.txt'
+write_file = open(training_filename, 'w')
 
+while left_index < len(left.peak_time) and right_index < len(right.peak_time):
+    x = left.peak_time[left_index]
+    y = right.peak_time[right_index]
+    res = overlap(x, y)
+    if res == -1:
+        left_index = left_index + 1
+    elif res == 1:
+        right_index = right_index + 1
+    else:#overlap
+        print('find peak: left = [%f, %f], right = [%f, %f]'%(x[0], x[1], y[0], y[1]))
+        overlap_count = overlap_count + 1
+        #display coverage
+        left_time_index = [left.time.index(x[0]), left.time.index(x[1])]
+        right_time_index = [right.time.index(y[0]), right.time.index(y[1])]
+        for index in range(left_time_index[0], left_time_index[1]):
+            cover_array[index] = 1
+        #display
+        fig, axs = plt.subplots(3, 1)
+        left_time = left.time[left_time_index[0]:left_time_index[1]]
+        right_time = right.time[right_time_index[0]: right_time_index[1]]
+        left_data = left.data['acc'][left_time_index[0]: left_time_index[1]]
+        right_data = right.data['acc'][right_time_index[0]: right_time_index[1]]
+        axs[0].plot(left_time, [data[0] for data in left_data], right_time, [data[0] for data in right_data])
+        axs[1].plot(left_time, [data[1] for data in left_data], right_time, [data[1] for data in right_data])
+        axs[2].plot(left_time, [data[2] for data in left_data], right_time, [data[2] for data in right_data])
+        plt.show()
+        
+        #wait for input to decide the shift
 
+        #store data
+        store_data = []
+        length = 50
+        for i in range(length):
+            for j in range(3):
+                store_data.append(left.data['acc'][left_time_index[0]+i][j])
+            for j in range(3):
+                store_data.append(left.data['att'][left_time_index[0]+i][j])
+            for j in range(3):
+                store_data.append(left.data['rot'][left_time_index[0]+i][j])
+            for j in range(3):
+                store_data.append(right.data['acc'][right_time_index[0]+i][j])
+            for j in range(3):
+                store_data.append(right.data['att'][right_time_index[0]+i][j])
+            for j in range(3):
+                store_data.append(right.data['rot'][right_time_index[0]+i][j])
+        write_file.write('1 ')#1 means palm
+        print(len(store_data))
+        for data in store_data:
+            write_file.write(str(data)+' ')
+        write_file.write('\n')
 
-
-# left.find_peak_after_fft()
-# right.find_peak_after_fft()
-# # find overlap peak
-# left_index = 0
-# right_index = 0
-# while left_index < len(left.peak_time) and right_index < len(right.peak_time):
-#     x = left.peak_time[left_index]
-#     y = right.peak_time[right_index]
-#     res = overlap(x, y)
-#     if res == -1:
-#         left_index = left_index + 1
-#     elif res == 1:
-#         right_index = right_index + 1
-#     else:#overlap
-#         print('find peak: left = [%f, %f], right = [%f, %f]'%(x[0], x[1], y[0], y[1]))
-#         peak_classification(x, y)#classification
-#         left_index = left_index + 1
-#         right_index = right_index + 1
+        #move to next peak
+        left_index = left_index + 1
+        right_index = right_index + 1
+print(overlap_count)
 # left.frequency_show()
 # right.frequency_show()
+fig, axs = plt.subplots(4, 1)
+axs[0].plot(left.time, [data[0] for data in left.data['acc']], right.time, [data[0] for data in right.data['acc']])
+axs[1].plot(left.time, [data[1] for data in left.data['acc']], right.time, [data[1] for data in right.data['acc']])
+axs[2].plot(left.time, [data[2] for data in left.data['acc']], right.time, [data[2] for data in right.data['acc']])
+axs[3].plot(left.time, cover_array)
+# plt.show()
+
+write_file.close()
