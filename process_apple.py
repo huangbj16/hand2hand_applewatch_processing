@@ -81,7 +81,7 @@ class Process(object):
                     self.acc_fft[j].append(k)
                 bucket = [0,0,0]
                 for k in range((int)(SAMPLE_LEN/2)):
-                    bucket[(int)(k/9)] = bucket[(int)(k/9)] + (sample_fft[j][k])
+                    bucket[(int)((k+5)/10)] = bucket[(int)((k+5)/10)] + (sample_fft[j][k])
                 for k in range(3):
                     self.acc_fft_bucket[j][k].append(bucket[k])
                 # calculate max frequency
@@ -112,11 +112,11 @@ class Process(object):
     def frequency_bucket_show(self):
         fig, axs = plt.subplots(6, 1)
         axs[0].plot(self.time, [data[0] for data in self.data['acc']])
-        axs[1].plot(self.acc_fft_max_time, self.acc_fft_bucket[0][0], self.acc_fft_max_time, self.acc_fft_bucket[0][1], self.acc_fft_max_time, self.acc_fft_bucket[0][2])
+        axs[1].plot(self.acc_fft_max_time, self.acc_fft_bucket[0][1], self.acc_fft_max_time, self.acc_fft_bucket[0][2])
         axs[2].plot(self.time, [data[1] for data in self.data['acc']])
-        axs[3].plot(self.acc_fft_max_time, self.acc_fft_bucket[1][0], self.acc_fft_max_time, self.acc_fft_bucket[1][1], self.acc_fft_max_time, self.acc_fft_bucket[1][2])
+        axs[3].plot(self.acc_fft_max_time, self.acc_fft_bucket[1][1], self.acc_fft_max_time, self.acc_fft_bucket[1][2])
         axs[4].plot(self.time, [data[2] for data in self.data['acc']])
-        axs[5].plot(self.acc_fft_max_time, self.acc_fft_bucket[2][0], self.acc_fft_max_time, self.acc_fft_bucket[2][1], self.acc_fft_max_time, self.acc_fft_bucket[2][2])
+        axs[5].plot(self.acc_fft_max_time, self.acc_fft_bucket[2][1], self.acc_fft_max_time, self.acc_fft_bucket[2][2])
         plt.show()
 
     def find_peak_after_fft(self):
@@ -136,30 +136,32 @@ class Process(object):
 
 
 #initialize
-left = Process('log-20190119-123108-WatchL.txt')
+left = Process('data/log-16-WatchL.txt')
 left.read_data()
 left.preprocess_timing_gap()
 # left.show_single_plot()
-right = Process('log-20190119-123108-WatchR.txt')
+right = Process('data/log-16-WatchR.txt')
 right.read_data()
 right.preprocess_timing_gap()
 # right.show_single_plot()
 
 #address the start timing gap
-TIMING_DIFF = 5.58
+TIMING_DIFF = left.time[0] - right.time[0]
 right.time = [time+TIMING_DIFF for time in right.time]
 
 #mix two datagram: original data visualization
-# fig, axs = plt.subplots(9, 1)
-# axs[0].plot(left.time, [data[0] for data in left.data['acc']], right.time, [data[0] for data in right.data['acc']])
-# axs[1].plot(left.time, [data[1] for data in left.data['acc']], right.time, [data[1] for data in right.data['acc']])
-# axs[2].plot(left.time, [data[2] for data in left.data['acc']], right.time, [data[2] for data in right.data['acc']])
-# axs[3].plot(left.time, [data[0] for data in left.data['att']], right.time, [data[0] for data in right.data['att']])
-# axs[4].plot(left.time, [data[1] for data in left.data['att']], right.time, [data[1] for data in right.data['att']])
-# axs[5].plot(left.time, [data[2] for data in left.data['att']], right.time, [data[2] for data in right.data['att']])
-# axs[6].plot(left.time, [data[0] for data in left.data['rot']], right.time, [data[0] for data in right.data['rot']])
-# axs[7].plot(left.time, [data[1] for data in left.data['rot']], right.time, [data[1] for data in right.data['rot']])
-# axs[8].plot(left.time, [data[2] for data in left.data['rot']], right.time, [data[2] for data in right.data['rot']])
+fig, axs = plt.subplots(9, 1)
+axs[0].plot(left.time, [data[0] for data in left.data['acc']], right.time, [data[0] for data in right.data['acc']])
+axs[1].plot(left.time, [data[1] for data in left.data['acc']], right.time, [data[1] for data in right.data['acc']])
+axs[2].plot(left.time, [data[2] for data in left.data['acc']], right.time, [data[2] for data in right.data['acc']])
+axs[3].plot(left.time, [data[0] for data in left.data['att']], right.time, [data[0] for data in right.data['att']])
+axs[4].plot(left.time, [data[1] for data in left.data['att']], right.time, [data[1] for data in right.data['att']])
+axs[5].plot(left.time, [data[2] for data in left.data['att']], right.time, [data[2] for data in right.data['att']])
+axs[6].plot(left.time, [data[0] for data in left.data['rot']], right.time, [data[0] for data in right.data['rot']])
+axs[7].plot(left.time, [data[1] for data in left.data['rot']], right.time, [data[1] for data in right.data['rot']])
+axs[8].plot(left.time, [data[2] for data in left.data['rot']], right.time, [data[2] for data in right.data['rot']])
+plt.show()
+
 # fig, axs = plt.subplots(3, 1)
 # axs[0].plot(left.time, [data[0] for data in left.data['acc']])
 # axs[1].plot(left.time, [data[1] for data in left.data['acc']])
@@ -192,80 +194,82 @@ right.frequency_transform()
 # right.frequency_show()
 right.frequency_bucket_show()
 
+
+
 #find peak by data after fft
-def overlap(x, y):
-    if x[1] < y[0]:
-        return -1
-    elif x[0] > y[1]:
-        return 1
-    else:#overlap
-        return 0
+# def overlap(x, y):
+#     if x[1] < y[0]:
+#         return -1
+#     elif x[0] > y[1]:
+#         return 1
+#     else:#overlap
+#         return 0
 
-def peak_classification(t_left, t_right):
-    left_start = left.time.index(t_left[0])
-    left_end = left.time.index(t_left[1])
-    right_start = right.time.index(t_right[0])
-    right_end = right.time.index(t_right[1])
-    #get acc data
-    left_acc = np.array(left.data['acc'][left_start:left_end])
-    right_acc = np.array(right.data['acc'][right_start:right_end])
-    # print(np.shape(left_acc))
-    # print(np.shape(right_acc))
+# def peak_classification(t_left, t_right):
+#     left_start = left.time.index(t_left[0])
+#     left_end = left.time.index(t_left[1])
+#     right_start = right.time.index(t_right[0])
+#     right_end = right.time.index(t_right[1])
+#     #get acc data
+#     left_acc = np.array(left.data['acc'][left_start:left_end])
+#     right_acc = np.array(right.data['acc'][right_start:right_end])
+#     # print(np.shape(left_acc))
+#     # print(np.shape(right_acc))
 
-    left_max = []
-    right_max = []
-    for i in range(3):
-        left_max.append(np.max(abs(left_acc[:,i])))
-        right_max.append(np.max(abs(right_acc[:,i])))
-    print(left_max, right_max)
-    left_coor = np.argmax(left_max)
-    right_coor = np.argmax(right_max)
-    print(left_coor, right_coor)
-    # classification rules
-    if left_coor == 2 and right_coor == 2:
-        left_is_positive = False
-        right_is_positive = False
-        if left_max[2] in left_acc[:,2]:
-            left_is_positive = True
-        if right_max[2] in right_acc[:,2]:
-            right_is_positive = True
-        print(left_is_positive, right_is_positive)
-        if left_is_positive == False and right_is_positive == False:
-            print("palm to palm")
-        elif left_is_positive == True and right_is_positive == False:
-            print("back to back")
-    elif left_coor == 0 and right_coor == 0:
-        left_is_positive = False
-        right_is_positive = False
-        if left_max[0] in left_acc[:,0]:
-            left_is_positive = True
-        if right_max[0] in right_acc[:,0]:
-            right_is_positive = True
-        print(left_is_positive, right_is_positive)
-        if left_is_positive == True and right_is_positive == False:
-            print("fist to fist")
-
-
+#     left_max = []
+#     right_max = []
+#     for i in range(3):
+#         left_max.append(np.max(abs(left_acc[:,i])))
+#         right_max.append(np.max(abs(right_acc[:,i])))
+#     print(left_max, right_max)
+#     left_coor = np.argmax(left_max)
+#     right_coor = np.argmax(right_max)
+#     print(left_coor, right_coor)
+#     # classification rules
+#     if left_coor == 2 and right_coor == 2:
+#         left_is_positive = False
+#         right_is_positive = False
+#         if left_max[2] in left_acc[:,2]:
+#             left_is_positive = True
+#         if right_max[2] in right_acc[:,2]:
+#             right_is_positive = True
+#         print(left_is_positive, right_is_positive)
+#         if left_is_positive == False and right_is_positive == False:
+#             print("palm to palm")
+#         elif left_is_positive == True and right_is_positive == False:
+#             print("back to back")
+#     elif left_coor == 0 and right_coor == 0:
+#         left_is_positive = False
+#         right_is_positive = False
+#         if left_max[0] in left_acc[:,0]:
+#             left_is_positive = True
+#         if right_max[0] in right_acc[:,0]:
+#             right_is_positive = True
+#         print(left_is_positive, right_is_positive)
+#         if left_is_positive == True and right_is_positive == False:
+#             print("fist to fist")
 
 
 
-left.find_peak_after_fft()
-right.find_peak_after_fft()
-# find overlap peak
-left_index = 0
-right_index = 0
-while left_index < len(left.peak_time) and right_index < len(right.peak_time):
-    x = left.peak_time[left_index]
-    y = right.peak_time[right_index]
-    res = overlap(x, y)
-    if res == -1:
-        left_index = left_index + 1
-    elif res == 1:
-        right_index = right_index + 1
-    else:#overlap
-        print('find peak: left = [%f, %f], right = [%f, %f]'%(x[0], x[1], y[0], y[1]))
-        peak_classification(x, y)#classification
-        left_index = left_index + 1
-        right_index = right_index + 1
-left.frequency_show()
-right.frequency_show()
+
+
+# left.find_peak_after_fft()
+# right.find_peak_after_fft()
+# # find overlap peak
+# left_index = 0
+# right_index = 0
+# while left_index < len(left.peak_time) and right_index < len(right.peak_time):
+#     x = left.peak_time[left_index]
+#     y = right.peak_time[right_index]
+#     res = overlap(x, y)
+#     if res == -1:
+#         left_index = left_index + 1
+#     elif res == 1:
+#         right_index = right_index + 1
+#     else:#overlap
+#         print('find peak: left = [%f, %f], right = [%f, %f]'%(x[0], x[1], y[0], y[1]))
+#         peak_classification(x, y)#classification
+#         left_index = left_index + 1
+#         right_index = right_index + 1
+# left.frequency_show()
+# right.frequency_show()
