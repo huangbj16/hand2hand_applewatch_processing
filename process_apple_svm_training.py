@@ -1,97 +1,112 @@
 import numpy as np
 from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split, cross_val_score, cross_validate
 from sklearn.metrics import precision_score, recall_score, f1_score
+from sklearn import datasets
 import matplotlib.pyplot as plt
 
-# f = open('svm_data.txt', 'r')
-# lines = f.readlines()
-# f.close()
-# X = []
-# y = []
-# for line in lines:
-#     conts = line.split()
-#     motion_type = int(conts[0])
-#     data = []
-#     contslen = len(conts)
-#     for i in range(1, contslen):
-#         data.append(float(conts[i]))
-#     y.append(motion_type)
-#     X.append(data)
-#
-# # X = np.array([[-1, -1], [-2, -1], [1, 1], [2, 1]])
-# # y = np.array([1, 1, 2, 3])
-# clf = SVC(gamma='auto')
-# clf.fit(X, y)
-
-motion = np.load('training/palm_np.npy')
-print(np.shape(motion))
+motion = np.load('training/fist_np.npy')
+# print(np.shape(motion))
 noise1 = np.load('training/noise_np.npy')
-print(np.shape(noise1))
+# print(np.shape(noise1))
 noise2 = np.load('training/noise_16_np.npy')
-print(np.shape(noise2))
+# print(np.shape(noise2))
 noise = np.concatenate((noise1, noise2), axis=0)
-print(np.shape(noise))
+# print(np.shape(noise))
 
-motion_len = (np.shape(motion))[0]
-motion_train_len = int(motion_len * 0.8)
-motion_test_len = motion_len - motion_train_len
-noise_len = (np.shape(noise))[0]
-noise_train_len = int(noise_len * 0.8)
-noise_test_len = noise_len - noise_train_len
+# concate
+motion_flag = np.linspace(0, 0, motion.shape[0])
+noise_flag = np.linspace(1, 1, noise.shape[0])
 
-motion_split = np.split(motion, [motion_train_len, motion_len])
-noise_split = np.split(noise, [noise_train_len, noise_len])
+combine_set = np.concatenate((motion, noise))
+print('set size: ', combine_set.shape)
+flag_set = np.concatenate((motion_flag, noise_flag))
+# print(flag_set.shape)
 
-train_flag_set1 = np.linspace(1, 1, motion_train_len)
-train_flag_set2 = np.linspace(2, 2, noise_train_len)
-train_flag_set = np.concatenate((train_flag_set1, train_flag_set2))
-test_flag_set1 = np.linspace(1, 1, motion_test_len)
-test_flag_set2 = np.linspace(2, 2, noise_test_len)
-test_flag_set = np.concatenate((test_flag_set1, test_flag_set2))
-print(np.shape(train_flag_set1), np.shape(train_flag_set2), np.shape(train_flag_set), np.shape(test_flag_set1), np.shape(test_flag_set2), np.shape(test_flag_set))
+# scoring = ['precision_macro', 'recall_macro']
+scoring = 'f1_macro'
+clf = SVC(kernel='rbf', gamma='auto')# ‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’
+scores = cross_validate(clf, combine_set, flag_set, scoring=scoring, cv=5, return_train_score=False)
+# print(scores.keys())
+print(scores['test_score'])
+# print(scores['test_precision_macro'])
+# print(scores['test_recall_macro'])
 
-print(motion_split)
-print(noise_split)
+#train
+# X_train, X_test, y_train, y_test = train_test_split(
+# ...     iris.data, iris.target, test_size=0.4, random_state=0)
+# X_train, X_test, y_train, y_test = train_test_split(combine_set, flag_set, test_size = 0.2, random_state=0)
+# print('train and test size: ', X_train.shape, X_test.shape, y_train.shape, y_test.shape)
+# clf = SVC(kernel='linear', C=1).fit(X_train, y_train)
+# clf.score(X_test, y_test)   
+# clf = SVC(kernel='linear', C=1)
+# scores = cross_val_score(clf, combine_set, flag_set, cv=5)
+# print(scores)
+# iris = datasets.load_iris()
+# X_train, X_test, y_train, y_test = train_test_split(iris.data, iris.target, test_size=0.4, random_state=0)
+# clf = SVC(kernel='linear', C=1).fit(X_train, y_train)
+# print(clf.score(X_test, y_test))
 
-motion_train = motion_split[0]
-print(np.shape(motion_train))
-motion_test = motion_split[1]
-print(np.shape(motion_test))
-noise_train = noise_split[0]
-print(np.shape(noise_train))
-noise_test = noise_split[1]
-print(np.shape(noise_test))
+# motion_len = (np.shape(motion))[0]
+# motion_train_len = int(motion_len * 0.8)
+# motion_test_len = motion_len - motion_train_len
+# noise_len = (np.shape(noise))[0]
+# noise_train_len = int(noise_len * 0.8)
+# noise_test_len = noise_len - noise_train_len
 
-train_set = np.concatenate((motion_train, noise_train))
-test_set = np.concatenate((motion_test, noise_test))
-print(np.shape(train_set))
-print(np.shape(test_set))
+# motion_split = np.split(motion, [motion_train_len, motion_len])
+# noise_split = np.split(noise, [noise_train_len, noise_len])
 
-clf = SVC(gamma='auto')
-clf.fit(train_set, train_flag_set)
-res = clf.predict(test_set)
-res = res - 1
-test_flag_set = test_flag_set - 1
-print(res)
-print(test_flag_set)
+# train_flag_set1 = np.linspace(0, 0, motion_train_len)
+# train_flag_set2 = np.linspace(1, 1, noise_train_len)
+# train_flag_set = np.concatenate((train_flag_set1, train_flag_set2))
+# test_flag_set1 = np.linspace(0, 0, motion_test_len)
+# test_flag_set2 = np.linspace(1, 1, noise_test_len)
+# test_flag_set = np.concatenate((test_flag_set1, test_flag_set2))
+# print(np.shape(train_flag_set1), np.shape(train_flag_set2), np.shape(train_flag_set), np.shape(test_flag_set1), np.shape(test_flag_set2), np.shape(test_flag_set))
+
+# print(motion_split)
+# print(noise_split)
+
+# motion_train = motion_split[0]
+# print(np.shape(motion_train))
+# motion_test = motion_split[1]
+# print(np.shape(motion_test))
+# noise_train = noise_split[0]
+# print(np.shape(noise_train))
+# noise_test = noise_split[1]
+# print(np.shape(noise_test))
+
+# train_set = np.concatenate((motion_train, noise_train))
+# test_set = np.concatenate((motion_test, noise_test))
+# print(np.shape(train_set))
+# print(np.shape(test_set))
+
+# clf = SVC(gamma='auto')
+# scores = cross_val_score(clf, train_set, train_flag_set, cv=5)
+# print(scores)
+
+# clf = SVC(gamma='auto')
+# clf.fit(train_set, train_flag_set)
+# res = clf.predict(test_set)
+# print(res)
+# print(test_flag_set)
 
 
-p = precision_score(test_flag_set, res, average='binary')
-r = recall_score(test_flag_set, res, average='binary')
-f1score = f1_score(test_flag_set, res, average='binary')
+# p = precision_score(test_flag_set, res, average='binary')
+# r = recall_score(test_flag_set, res, average='binary')
+# f1score = f1_score(test_flag_set, res, average='binary')
 
-print(p)
-print(r)
-print(f1score)
+# print(p)
+# print(r)
+# print(f1score)
 
 # (1270, 900)
-length = 50
-index_array = np.arange(length)
-for j in range(100):
-    data_array = motion[j*10].reshape(50, 18)
-    print(np.shape(data_array))
-    #mix two datagram: original data visualization
-    fig, axs = plt.subplots(9, 1)
-    for i in range(9):
-        axs[i].plot(index_array, data_array[:,i], index_array, data_array[:,i+9])
-    plt.show()
+# motion_display = motion.reshape(-1, 18)
+# length = (np.shape(motion_display))[0] / 50
+# index_array = np.arange(length)
+# #mix two datagram: original data visualization
+# fig, axs = plt.subplots(9, 1)
+# for i in range(9):
+#     axs[i].plot(index_array, motion_display[24::50,i], index_array, motion_display[24::50,i+9])
+# plt.show()

@@ -1,0 +1,10 @@
+PS D:\2018autumn\hand2hand\hand2hand_applewatch_processing> python .\process_apple_svm_training.py
+palm set size:  (2368, 900)
+[0.98095085 0.98725098 0.90483923 0.98937427 0.96153221]
+PS D:\2018autumn\hand2hand\hand2hand_applewatch_processing> python .\process_apple_svm_training.py
+back set size:  (2140, 900)
+[0.97901916 0.99533493 0.98363762 0.99531181 1.        ]
+PS D:\2018autumn\hand2hand\hand2hand_applewatch_processing> python .\process_apple_svm_training.py
+fist set size:  (2049, 900)
+[0.98042391 0.99509205 0.98527616 0.97545843 0.9926305 ]
+PS D:\2018autumn\hand2hand\hand2hand_applewatch_processing>
