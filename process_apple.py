@@ -304,30 +304,69 @@ while left_index < len(left.peak_time) and right_index < len(right.peak_time):
         axs[1].plot(left_time, [data[1] for data in left_data], right_time, [data[1] for data in right_data])
         axs[2].plot(left_time, [data[2] for data in left_data], right_time, [data[2] for data in right_data])
         plt.show()
-        
-        #wait for input to decide the shift
+        #continue in advance
+        left_index = left_index + 1
+        right_index = right_index + 1
+        continue
 
+        #wait for input to decide the shift
+        array_peak = input("input where is the peak: ")
+        array_peak = str(array_peak)
+        array_peak = [float(array_peak), float(array_peak)+0.2]
+        print(array_peak)
+        while left.time[left_time_index[0]] < array_peak[0]:
+            left_time_index[0] = left_time_index[0] + 1
+        while left.time[left_time_index[0]] > array_peak[0]:
+            left_time_index[0] = left_time_index[0] - 1
+        while left.time[left_time_index[1]] > array_peak[1]:
+            left_time_index[1] = left_time_index[1] - 1
+        while left.time[left_time_index[1]] < array_peak[1]:
+            left_time_index[1] = left_time_index[1] + 1
+        while right.time[right_time_index[0]] < array_peak[0]:
+            right_time_index[0] = right_time_index[0] + 1
+        while right.time[right_time_index[0]] > array_peak[0]:
+            right_time_index[0] = right_time_index[0] - 1
+        while right.time[right_time_index[1]] > array_peak[1]:
+            right_time_index[1] = right_time_index[1] - 1
+        while right.time[right_time_index[1]] < array_peak[1]:
+            right_time_index[1] = right_time_index[1] + 1
+        #now bound is at the edge of peak
+        
         #store data
-        store_data = []
         length = 50
-        for i in range(length):
-            for j in range(3):
-                store_data.append(left.data['acc'][left_time_index[0]+i][j])
-            for j in range(3):
-                store_data.append(left.data['att'][left_time_index[0]+i][j])
-            for j in range(3):
-                store_data.append(left.data['rot'][left_time_index[0]+i][j])
-            for j in range(3):
-                store_data.append(right.data['acc'][right_time_index[0]+i][j])
-            for j in range(3):
-                store_data.append(right.data['att'][right_time_index[0]+i][j])
-            for j in range(3):
-                store_data.append(right.data['rot'][right_time_index[0]+i][j])
-        write_file.write('1 ')#1 means palm
-        print(len(store_data))
-        for data in store_data:
-            write_file.write(str(data)+' ')
-        write_file.write('\n')
+        left_time_index[1] = left_time_index[1] - length
+        right_time_index[1] = right_time_index[1] - length
+        while left_time_index[1] < left_time_index[0] and right_time_index[1] < right_time_index[0]:
+            store_data = []
+            for i in range(length):
+                for j in range(3):
+                    store_data.append(left.data['acc'][left_time_index[1]+i][j])
+                for j in range(3):
+                    store_data.append(left.data['att'][left_time_index[1]+i][j])
+                for j in range(3):
+                    store_data.append(left.data['rot'][left_time_index[1]+i][j])
+                for j in range(3):
+                    store_data.append(right.data['acc'][right_time_index[1]+i][j])
+                for j in range(3):
+                    store_data.append(right.data['att'][right_time_index[1]+i][j])
+                for j in range(3):
+                    store_data.append(right.data['rot'][right_time_index[1]+i][j])
+            write_file.write('1 ')#1 means palm
+            print(len(store_data))
+            for data in store_data:
+                write_file.write(str(data)+' ')
+            write_file.write('\n')
+            # fig, axs = plt.subplots(3, 1)
+            # left_time = left.time[left_time_index[1]: left_time_index[1]+length]
+            # right_time = right.time[left_time_index[1]: left_time_index[1]+length]
+            # left_data = left.data['acc'][left_time_index[1]: left_time_index[1]+length]
+            # right_data = right.data['acc'][left_time_index[1]: left_time_index[1]+length]
+            # axs[0].plot(left_time, [data[0] for data in left_data], right_time, [data[0] for data in right_data])
+            # axs[1].plot(left_time, [data[1] for data in left_data], right_time, [data[1] for data in right_data])
+            # axs[2].plot(left_time, [data[2] for data in left_data], right_time, [data[2] for data in right_data])
+            # plt.show()
+            left_time_index[1] = left_time_index[1] + 1
+            right_time_index[1] = right_time_index[1] + 1
 
         #move to next peak
         left_index = left_index + 1
