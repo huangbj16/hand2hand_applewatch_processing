@@ -3,9 +3,10 @@ from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split, cross_val_score, cross_validate
 from sklearn.metrics import precision_score, recall_score, f1_score
 from sklearn import datasets
+from sklearn.externals import joblib
 import matplotlib.pyplot as plt
 
-motion = np.load('training/fist_np.npy')
+motion = np.load('training/palm_np.npy')
 # print(np.shape(motion))
 noise1 = np.load('training/noise_np.npy')
 # print(np.shape(noise1))
@@ -26,9 +27,16 @@ flag_set = np.concatenate((motion_flag, noise_flag))
 # scoring = ['precision_macro', 'recall_macro']
 scoring = 'f1_macro'
 clf = SVC(kernel='rbf', gamma='auto')# ‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’
-scores = cross_validate(clf, combine_set, flag_set, scoring=scoring, cv=5, return_train_score=False)
-# print(scores.keys())
+scores = cross_validate(clf, combine_set, flag_set, scoring=scoring, cv=5, return_train_score=False, return_estimator=True)
+print(scores.keys())
 print(scores['test_score'])
+print(scores['estimator'])
+
+#joblib.dump(clf, "train_model.m")
+#clf = joblib.load("train_model.m")
+for i in range(5):
+    joblib.dump(scores['estimator'][i], "model/palm_noise_svm_"+str(i)+".m")
+
 # print(scores['test_precision_macro'])
 # print(scores['test_recall_macro'])
 
@@ -38,7 +46,7 @@ print(scores['test_score'])
 # X_train, X_test, y_train, y_test = train_test_split(combine_set, flag_set, test_size = 0.2, random_state=0)
 # print('train and test size: ', X_train.shape, X_test.shape, y_train.shape, y_test.shape)
 # clf = SVC(kernel='linear', C=1).fit(X_train, y_train)
-# clf.score(X_test, y_test)   
+# clf.score(X_test, y_test)
 # clf = SVC(kernel='linear', C=1)
 # scores = cross_val_score(clf, combine_set, flag_set, cv=5)
 # print(scores)
@@ -102,11 +110,11 @@ print(scores['test_score'])
 # print(f1score)
 
 # (1270, 900)
-# motion_display = motion.reshape(-1, 18)
-# length = (np.shape(motion_display))[0] / 50
-# index_array = np.arange(length)
-# #mix two datagram: original data visualization
-# fig, axs = plt.subplots(9, 1)
-# for i in range(9):
-#     axs[i].plot(index_array, motion_display[24::50,i], index_array, motion_display[24::50,i+9])
-# plt.show()
+motion_display = motion.reshape(-1, 18)
+length = (np.shape(motion_display))[0] / 50
+index_array = np.arange(length)
+#mix two datagram: original data visualization
+fig, axs = plt.subplots(9, 1)
+for i in range(9):
+    axs[i].plot(index_array, motion_display[24::50,i], index_array, motion_display[24::50,i+9])
+plt.show()
