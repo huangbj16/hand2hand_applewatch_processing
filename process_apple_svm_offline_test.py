@@ -174,7 +174,7 @@ right.preprocess_timing_gap()
 # right.show_single_plot()
 
 #address the start timing gap
-FILE_SHIFT = 0.054
+FILE_SHIFT = 0.064
 TIMING_DIFF = left.time[0] - right.time[0]
 right.time = [time+TIMING_DIFF-FILE_SHIFT for time in right.time]
 
@@ -191,7 +191,7 @@ axs[7].plot(left.time, [data[1] for data in left.data['rot']], right.time, [data
 axs[8].plot(left.time, [data[2] for data in left.data['rot']], right.time, [data[2] for data in right.data['rot']])
 plt.show()
 
-clf = joblib.load("model/palm_noise_svm_0.m")
+clf = joblib.load("model/classification10_withnoise_model.m")
 
 left_start = 0
 right_start = 0
@@ -201,6 +201,14 @@ while abs(left.time[left_start] - right.time[right_start]) > 0.01:
     else:
         right_start = right_start + 1
 print('start_time: ', left_start, left.time[left_start], right_start, right.time[right_start])
+
+def isAcc(k):
+    if k >= 6 and k < 9:
+        return True
+    elif k >= 15 and k < 18:
+        return True
+    else:
+        return False
 
 length = 50
 offset = 25
@@ -221,21 +229,49 @@ while left_start + length < len(left.time) and right_start + length < len(right.
                 store_data.append(right.data['att'][right_start+k][j])
             for j in range(3):
                 store_data.append(right.data['rot'][right_start+k][j])
-        res = clf.predict([store_data])
-        # print(res[0])
-        signal_array.append(res[0])
-        # if res[0] == 0:
-        #     display_data = np.array(store_data).reshape(-1, 18)
-        #     display_index = np.arange(50)
-        #     print(display_data.shape)
-        #     fig, axs = plt.subplots(9, 1)
-        #     for i in range(9):
-        #         axs[i].plot(display_index, display_data[:, i], display_index, display_data[:, 9+i])
-        #     plt.show()
+
+        data_unit = (np.array(store_data)).reshape(50, 18)
+        #fft first
+        is_signal = False
+        for k in range(3):
+            fft_unit = np.array(abs(fft(data_unit[:, k])))
+            if np.sum(fft_unit[5:15]) > 10:
+                is_signal = True
+                break
+            fft_unit = np.array(abs(fft(data_unit[:, 9+k])))
+            if np.sum(fft_unit[5:15]) > 10:
+                is_signal = True
+                break
+        if not is_signal:
+            signal_array.append(7)
+        else:
+            #if frequency energy is high enough, judge signal
+            feature_length = 48
+            featured_unit = np.zeros((feature_length))
+            for k in range(18):
+                if not isAcc(k):
+                    data_unit_coor = data_unit[:, k]
+                    if k >= 9:
+                        k = k - 3
+                    featured_unit[4*k] = np.min(data_unit_coor)
+                    featured_unit[4*k+1] = np.max(data_unit_coor)
+                    featured_unit[4*k+2] = np.mean(data_unit_coor)
+                    featured_unit[4*k+3] = np.std(data_unit_coor)
+            res = clf.predict([featured_unit])
+            # print(res[0])
+            signal_array.append(res[0])
+            # if res[0] == 0:
+            #     display_data = np.array(store_data).reshape(-1, 18)
+            #     display_index = np.arange(50)
+            #     print(display_data.shape)
+            #     fig, axs = plt.subplots(9, 1)
+            #     for i in range(9):
+            #         axs[i].plot(display_index, display_data[:, i], display_index, display_data[:, 9+i])
+            #     plt.show()
     except:
         # print(store_data)
         print('NaN error')
-        signal_array.append(1)
+        signal_array.append(7)
         break
     finally:
         left_start = left_start + offset

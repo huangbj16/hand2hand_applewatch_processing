@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import math as math
 import numpy as np
+import random
 from scipy.fftpack import fft,ifft
 
 ''' 流程
@@ -165,17 +166,27 @@ class Process(object):
 
 
 #initialize
-left = Process('data/motion/log-20190123-fingerslideright-WatchL.txt')
+left = Process('data/motion/log-20190124-palmtopalm-WatchL.txt')
 left.read_data()
 left.preprocess_timing_gap()
 # left.show_single_plot()
-right = Process('data/motion/log-20190123-fingerslideright-WatchR.txt')
+right = Process('data/motion/log-20190124-palmtopalm-WatchR.txt')
 right.read_data()
 right.preprocess_timing_gap()
 # right.show_single_plot()
 
+# print(len(left.time))
+# for i in range(len(left.time)):
+#     if left.time[i] > left.time[i+1]:
+#         print(i)
+#         print(len(left.time))
+#         j = i
+#         while j < len(left.time):
+#             print(left.time[j])
+#             j = j+1
+
 #address the start timing gap
-FILE_SHIFT = 0.05
+FILE_SHIFT = 0.03
 TIMING_DIFF = left.time[0] - right.time[0]
 right.time = [time+TIMING_DIFF-FILE_SHIFT for time in right.time]
 
@@ -239,7 +250,8 @@ fft_cover_array = []
 count = 0
 fft_count = 0
 both_count = 0
-THRESHOLD = 10
+THRESHOLD = 10#change
+TIME_THRESHOLD = 3#change
 index_array = np.arange(0, 50)
 store_data_list = []
 
@@ -247,14 +259,19 @@ while left_start + length < len(left.time) and right_start + length < len(right.
     left_data = (np.array(left.data['acc'][left_start: left_start+length])).T
     right_data = (np.array(right.data['acc'][right_start: right_start+length])).T
     # print(left_data.shape, right_data.shape)
+    #time field is peak
     is_time_peak = False
-    if np.max(np.fabs(left_data[1])) > 1 or np.max(np.fabs(right_data[1])) > 1:
+    for i in range(3):
+        if np.max(np.fabs(left_data[i])) > TIME_THRESHOLD or np.max(np.fabs(right_data[i])) > TIME_THRESHOLD:#change
+            is_time_peak = True
+            break
+    if is_time_peak:
         cover_array.append(1)
         count = count + 1
-        is_time_peak = True
     else:
         cover_array.append(0)
 
+    #frequency field is peak
     left_data_fft = np.zeros(left_data.shape)
     right_data_fft = np.zeros(right_data.shape)
     for i in range(3):
@@ -268,9 +285,9 @@ while left_start + length < len(left.time) and right_start + length < len(right.
             right_bucket[j][(int)((k+5)/10)] = right_bucket[j][(int)((k+5)/10)] + (right_data_fft[j, k])
     is_peak = False
     for j in range(3):
-        if left_bucket[j][2] > THRESHOLD and right_bucket[j][2] > THRESHOLD:
+        if left_bucket[i][1] > THRESHOLD or right_bucket[i][1] > THRESHOLD:
             is_peak = True
-            break
+        break
     if is_peak:
         fft_cover_array.append(1)
         fft_count = fft_count + 1
@@ -280,6 +297,17 @@ while left_start + length < len(left.time) and right_start + length < len(right.
     if is_peak and is_time_peak:
         #double confirm, no align currently
         both_count = both_count + 1
+        #align
+        peak_index = np.argmax(np.fabs(right_data[1])) - 25 - int(random.random()*20-10)#change
+        left_start = left_start + peak_index
+        right_start = right_start + peak_index
+        left_data = (np.array(left.data['acc'][left_start: left_start+length])).T
+        right_data = (np.array(right.data['acc'][right_start: right_start+length])).T
+        # fig, axs = plt.subplots(3, 1)
+        # for i in range(3):
+        #     axs[i].plot(index_array, left_data[i], index_array, right_data[i])
+        # plt.show()
+        #store data
         store_data = []
         for i in range(length):
             for j in range(3):
@@ -295,15 +323,6 @@ while left_start + length < len(left.time) and right_start + length < len(right.
             for j in range(3):
                 store_data.append(right.data['rot'][right_start+i][j])
         store_data_list.append(store_data)
-        # peak_index = np.argmax(np.fabs(left_data[2])) - 25
-        # left_start = left_start + peak_index
-        # right_start = right_start + peak_index
-        # left_data = (np.array(left.data['acc'][left_start: left_start+length])).T
-        # right_data = (np.array(right.data['acc'][right_start: right_start+length])).T
-        # fig, axs = plt.subplots(3, 1)
-        # for i in range(3):
-        #     axs[i].plot(index_array, left_data[i], index_array, right_data[i])
-        # plt.show()
     #move to next
     left_start = left_start + length
     right_start = right_start + length
@@ -317,7 +336,7 @@ while left_start + length < len(left.time) and right_start + length < len(right.
 
 store_data_list = np.array(store_data_list)
 print('data size: ', store_data_list.shape)
-np.save('training/motion/fingerslideright_np', store_data_list)
+np.save('training/motion/palmtopalm_np', store_data_list)
 
 fig, axs = plt.subplots(5, 1)
 axs[0].plot(left.time, [data[0] for data in left.data['acc']], right.time, [data[0] for data in right.data['acc']])
