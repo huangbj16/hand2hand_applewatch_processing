@@ -3,6 +3,13 @@ import math as math
 import numpy as np
 from scipy.fftpack import fft,ifft
 
+''' 流程
+修改文件名
+计算误差
+修改提取样本的时域频域阈值
+采集样本
+'''
+
 def length(coor):
     x = float(coor[0])
     y = float(coor[1])
@@ -81,13 +88,13 @@ class Process(object):
                     self.acc_fft[j].append(k)
                 bucket = [0,0,0]
                 for k in range((int)(SAMPLE_LEN/2)):
-                    # bucket[(int)((k+5)/10)] = bucket[(int)((k+5)/10)] + (sample_fft[j][k])
-                    if k < 5:
-                        bucket[0] = bucket[0] + sample_fft[j][k]
-                    elif k < 10:
-                        bucket[1] = bucket[1] + sample_fft[j][k]
-                    else:
-                        bucket[2] = bucket[2] + sample_fft[j][k]
+                    bucket[(int)((k+5)/10)] = bucket[(int)((k+5)/10)] + (sample_fft[j][k])
+                    # if k < 5:
+                    #     bucket[0] = bucket[0] + sample_fft[j][k]
+                    # elif k < 10:
+                    #     bucket[1] = bucket[1] + sample_fft[j][k]
+                    # else:
+                    #     bucket[2] = bucket[2] + sample_fft[j][k]
                 for k in range(3):
                     self.acc_fft_bucket[j][k].append(bucket[k])
                 # calculate max frequency
@@ -158,31 +165,31 @@ class Process(object):
 
 
 #initialize
-left = Process('data/log-fist-WatchL.txt')
+left = Process('data/motion/log-20190123-fingerslideright-WatchL.txt')
 left.read_data()
 left.preprocess_timing_gap()
 # left.show_single_plot()
-right = Process('data/log-fist-WatchR.txt')
+right = Process('data/motion/log-20190123-fingerslideright-WatchR.txt')
 right.read_data()
 right.preprocess_timing_gap()
 # right.show_single_plot()
 
 #address the start timing gap
-FILE_SHIFT = 0.01
+FILE_SHIFT = 0.05
 TIMING_DIFF = left.time[0] - right.time[0]
 right.time = [time+TIMING_DIFF-FILE_SHIFT for time in right.time]
 
 #mix two datagram: original data visualization
-fig, axs = plt.subplots(3, 1)
+fig, axs = plt.subplots(9, 1)
 axs[0].plot(left.time, [data[0] for data in left.data['acc']], right.time, [data[0] for data in right.data['acc']])
 axs[1].plot(left.time, [data[1] for data in left.data['acc']], right.time, [data[1] for data in right.data['acc']])
 axs[2].plot(left.time, [data[2] for data in left.data['acc']], right.time, [data[2] for data in right.data['acc']])
-# axs[3].plot(left.time, [data[0] for data in left.data['att']], right.time, [data[0] for data in right.data['att']])
-# axs[4].plot(left.time, [data[1] for data in left.data['att']], right.time, [data[1] for data in right.data['att']])
-# axs[5].plot(left.time, [data[2] for data in left.data['att']], right.time, [data[2] for data in right.data['att']])
-# axs[6].plot(left.time, [data[0] for data in left.data['rot']], right.time, [data[0] for data in right.data['rot']])
-# axs[7].plot(left.time, [data[1] for data in left.data['rot']], right.time, [data[1] for data in right.data['rot']])
-# axs[8].plot(left.time, [data[2] for data in left.data['rot']], right.time, [data[2] for data in right.data['rot']])
+axs[3].plot(left.time, [data[0] for data in left.data['att']], right.time, [data[0] for data in right.data['att']])
+axs[4].plot(left.time, [data[1] for data in left.data['att']], right.time, [data[1] for data in right.data['att']])
+axs[5].plot(left.time, [data[2] for data in left.data['att']], right.time, [data[2] for data in right.data['att']])
+axs[6].plot(left.time, [data[0] for data in left.data['rot']], right.time, [data[0] for data in right.data['rot']])
+axs[7].plot(left.time, [data[1] for data in left.data['rot']], right.time, [data[1] for data in right.data['rot']])
+axs[8].plot(left.time, [data[2] for data in left.data['rot']], right.time, [data[2] for data in right.data['rot']])
 plt.show()
 
 # fig, axs = plt.subplots(3, 1)
@@ -217,15 +224,119 @@ right.frequency_transform()
 # right.frequency_show()
 right.frequency_bucket_show()
 
+left_start = 0
+right_start = 0
+while abs(left.time[left_start] - right.time[right_start]) > 0.01:
+    if left.time[left_start] < right.time[right_start]:
+        left_start = left_start + 1
+    else:
+        right_start = right_start + 1
+print('start_time: ', left_start, left.time[left_start], right_start, right.time[right_start])
+
+length = 50
+cover_array = []
+fft_cover_array = []
+count = 0
+fft_count = 0
+both_count = 0
+THRESHOLD = 10
+index_array = np.arange(0, 50)
+store_data_list = []
+
+while left_start + length < len(left.time) and right_start + length < len(right.time):
+    left_data = (np.array(left.data['acc'][left_start: left_start+length])).T
+    right_data = (np.array(right.data['acc'][right_start: right_start+length])).T
+    # print(left_data.shape, right_data.shape)
+    is_time_peak = False
+    if np.max(np.fabs(left_data[1])) > 1 or np.max(np.fabs(right_data[1])) > 1:
+        cover_array.append(1)
+        count = count + 1
+        is_time_peak = True
+    else:
+        cover_array.append(0)
+
+    left_data_fft = np.zeros(left_data.shape)
+    right_data_fft = np.zeros(right_data.shape)
+    for i in range(3):
+        left_data_fft[i] = np.array(abs(fft(left_data[i])))
+        right_data_fft[i] = np.array(abs(fft(right_data[i])))
+    left_bucket = [[0,0,0], [0,0,0], [0,0,0]]
+    right_bucket = [[0,0,0], [0,0,0], [0,0,0]]
+    for j in range(3):
+        for k in range((int)(length/2)):
+            left_bucket[j][(int)((k+5)/10)] = left_bucket[j][(int)((k+5)/10)] + (left_data_fft[j, k])
+            right_bucket[j][(int)((k+5)/10)] = right_bucket[j][(int)((k+5)/10)] + (right_data_fft[j, k])
+    is_peak = False
+    for j in range(3):
+        if left_bucket[j][2] > THRESHOLD and right_bucket[j][2] > THRESHOLD:
+            is_peak = True
+            break
+    if is_peak:
+        fft_cover_array.append(1)
+        fft_count = fft_count + 1
+    else:
+        fft_cover_array.append(0)
+
+    if is_peak and is_time_peak:
+        #double confirm, no align currently
+        both_count = both_count + 1
+        store_data = []
+        for i in range(length):
+            for j in range(3):
+                store_data.append(left.data['acc'][left_start+i][j])
+            for j in range(3):
+                store_data.append(left.data['att'][left_start+i][j])
+            for j in range(3):
+                store_data.append(left.data['rot'][left_start+i][j])
+            for j in range(3):
+                store_data.append(right.data['acc'][right_start+i][j])
+            for j in range(3):
+                store_data.append(right.data['att'][right_start+i][j])
+            for j in range(3):
+                store_data.append(right.data['rot'][right_start+i][j])
+        store_data_list.append(store_data)
+        # peak_index = np.argmax(np.fabs(left_data[2])) - 25
+        # left_start = left_start + peak_index
+        # right_start = right_start + peak_index
+        # left_data = (np.array(left.data['acc'][left_start: left_start+length])).T
+        # right_data = (np.array(right.data['acc'][right_start: right_start+length])).T
+        # fig, axs = plt.subplots(3, 1)
+        # for i in range(3):
+        #     axs[i].plot(index_array, left_data[i], index_array, right_data[i])
+        # plt.show()
+    #move to next
+    left_start = left_start + length
+    right_start = right_start + length
+    if abs(left.time[left_start] - right.time[right_start]) > 0.01:
+        print('start_time: ', left_start, left.time[left_start], right_start, right.time[right_start])
+        while abs(left.time[left_start] - right.time[right_start]) > 0.01:
+            if left.time[left_start] < right.time[right_start]:
+                left_start = left_start + 1
+            else:
+                right_start = right_start + 1
+
+store_data_list = np.array(store_data_list)
+print('data size: ', store_data_list.shape)
+np.save('training/motion/fingerslideright_np', store_data_list)
+
+fig, axs = plt.subplots(5, 1)
+axs[0].plot(left.time, [data[0] for data in left.data['acc']], right.time, [data[0] for data in right.data['acc']])
+axs[1].plot(left.time, [data[1] for data in left.data['acc']], right.time, [data[1] for data in right.data['acc']])
+axs[2].plot(left.time, [data[2] for data in left.data['acc']], right.time, [data[2] for data in right.data['acc']])
+axs[3].plot(cover_array)
+axs[4].plot(fft_cover_array)
+plt.show()
+
+print(count, fft_count, both_count)
 
 #find peak by data after fft
-def overlap(x, y):
-    if x[1] < y[0]:
-        return -1
-    elif x[0] > y[1]:
-        return 1
-    else:#overlap
-        return 0
+# def overlap(x, y):
+#     if x[1] < y[0]:
+#         return -1
+#     elif x[0] > y[1]:
+#         return 1
+#     else:#overlap
+#         return 0
 
 # def peak_classification(t_left, t_right):
 #     left_start = left.time.index(t_left[0])
@@ -271,139 +382,139 @@ def overlap(x, y):
 #         if left_is_positive == True and right_is_positive == False:
 #             print("fist to fist")
 
-left.find_peak_after_fft()
-right.find_peak_after_fft()
-# find overlap peak
-left_index = 0
-right_index = 0
-overlap_count = 0
-#display use array
-# index_array = np.arange(0, 50)
-cover_array = np.zeros(len(left.time))
-#store file
-training_filename = 'training/fist.txt'
-write_file = open(training_filename, 'w')
-#read peak from file
-read_file = open('data/fist-peak.txt', 'r')
-write_array = []
+# left.find_peak_after_fft()
+# right.find_peak_after_fft()
+# # find overlap peak
+# left_index = 0
+# right_index = 0
+# overlap_count = 0
+# #display use array
+# # index_array = np.arange(0, 50)
+# cover_array = np.zeros(len(left.time))
+# #store file
+# training_filename = 'training/motion/fist.txt'
+# write_file = open(training_filename, 'w')
+# #read peak from file
+# read_file = open('data/fist-peak.txt', 'r')
+# write_array = []
 
-while left_index < len(left.peak_time) and right_index < len(right.peak_time):
-    x = left.peak_time[left_index]
-    y = right.peak_time[right_index]
-    res = overlap(x, y)
-    if res == -1:
-        left_index = left_index + 1
-    elif res == 1:
-        right_index = right_index + 1
-    else:#overlap
-        print('find peak: left = [%f, %f], right = [%f, %f]'%(x[0], x[1], y[0], y[1]))
-        overlap_count = overlap_count + 1
-        #display coverage
-        left_time_index = [left.time.index(x[0]), left.time.index(x[1])]
-        right_time_index = [right.time.index(y[0]), right.time.index(y[1])]
-        for index in range(left_time_index[0], left_time_index[1]):
-            cover_array[index] = 1
-        # #display
-        # fig, axs = plt.subplots(3, 1)
-        # left_time = left.time[left_time_index[0]:left_time_index[1]]
-        # right_time = right.time[right_time_index[0]: right_time_index[1]]
-        # left_data = left.data['acc'][left_time_index[0]: left_time_index[1]]
-        # right_data = right.data['acc'][right_time_index[0]: right_time_index[1]]
-        # axs[0].plot(left_time, [data[0] for data in left_data], right_time, [data[0] for data in right_data])
-        # axs[1].plot(left_time, [data[1] for data in left_data], right_time, [data[1] for data in right_data])
-        # axs[2].plot(left_time, [data[2] for data in left_data], right_time, [data[2] for data in right_data])
-        # plt.show()
-        # # continue in advance
-        # left_index = left_index + 1
-        # right_index = right_index + 1
-        # continue
+# while left_index < len(left.peak_time) and right_index < len(right.peak_time):
+#     x = left.peak_time[left_index]
+#     y = right.peak_time[right_index]
+#     res = overlap(x, y)
+#     if res == -1:
+#         left_index = left_index + 1
+#     elif res == 1:
+#         right_index = right_index + 1
+#     else:#overlap
+#         print('find peak: left = [%f, %f], right = [%f, %f]'%(x[0], x[1], y[0], y[1]))
+#         overlap_count = overlap_count + 1
+#         #display coverage
+#         left_time_index = [left.time.index(x[0]), left.time.index(x[1])]
+#         right_time_index = [right.time.index(y[0]), right.time.index(y[1])]
+#         for index in range(left_time_index[0], left_time_index[1]):
+#             cover_array[index] = 1
+#         # #display
+#         # fig, axs = plt.subplots(3, 1)
+#         # left_time = left.time[left_time_index[0]:left_time_index[1]]
+#         # right_time = right.time[right_time_index[0]: right_time_index[1]]
+#         # left_data = left.data['acc'][left_time_index[0]: left_time_index[1]]
+#         # right_data = right.data['acc'][right_time_index[0]: right_time_index[1]]
+#         # axs[0].plot(left_time, [data[0] for data in left_data], right_time, [data[0] for data in right_data])
+#         # axs[1].plot(left_time, [data[1] for data in left_data], right_time, [data[1] for data in right_data])
+#         # axs[2].plot(left_time, [data[2] for data in left_data], right_time, [data[2] for data in right_data])
+#         # plt.show()
+#         # # continue in advance
+#         # left_index = left_index + 1
+#         # right_index = right_index + 1
+#         # continue
 
-        #wait for input to decide the shift
-        # array_peak = input("input where is the peak: ")
-        # array_peak = str(array_peak)
-        # array_peak = [float(array_peak), float(array_peak)+0.2]
+#         #wait for input to decide the shift
+#         # array_peak = input("input where is the peak: ")
+#         # array_peak = str(array_peak)
+#         # array_peak = [float(array_peak), float(array_peak)+0.2]
 
-        ####use
-        peak = read_file.readline()
-        if 'no' in peak:
-            left_index = left_index + 1
-            right_index = right_index + 1
-            continue
-        else:
-            peak = float(peak)
-        array_peak = [peak, peak+0.2]
-        print(array_peak)
-        while left.time[left_time_index[0]] < array_peak[0]:
-            left_time_index[0] = left_time_index[0] + 1
-        while left.time[left_time_index[0]] > array_peak[0]:
-            left_time_index[0] = left_time_index[0] - 1
-        while left.time[left_time_index[1]] > array_peak[1]:
-            left_time_index[1] = left_time_index[1] - 1
-        while left.time[left_time_index[1]] < array_peak[1]:
-            left_time_index[1] = left_time_index[1] + 1
-        while right.time[right_time_index[0]] < array_peak[0]:
-            right_time_index[0] = right_time_index[0] + 1
-        while right.time[right_time_index[0]] > array_peak[0]:
-            right_time_index[0] = right_time_index[0] - 1
-        while right.time[right_time_index[1]] > array_peak[1]:
-            right_time_index[1] = right_time_index[1] - 1
-        while right.time[right_time_index[1]] < array_peak[1]:
-            right_time_index[1] = right_time_index[1] + 1
-        #now bound is at the edge of peak
+#         ####use
+#         peak = read_file.readline()
+#         if 'no' in peak:
+#             left_index = left_index + 1
+#             right_index = right_index + 1
+#             continue
+#         else:
+#             peak = float(peak)
+#         array_peak = [peak, peak+0.2]
+#         print(array_peak)
+#         while left.time[left_time_index[0]] < array_peak[0]:
+#             left_time_index[0] = left_time_index[0] + 1
+#         while left.time[left_time_index[0]] > array_peak[0]:
+#             left_time_index[0] = left_time_index[0] - 1
+#         while left.time[left_time_index[1]] > array_peak[1]:
+#             left_time_index[1] = left_time_index[1] - 1
+#         while left.time[left_time_index[1]] < array_peak[1]:
+#             left_time_index[1] = left_time_index[1] + 1
+#         while right.time[right_time_index[0]] < array_peak[0]:
+#             right_time_index[0] = right_time_index[0] + 1
+#         while right.time[right_time_index[0]] > array_peak[0]:
+#             right_time_index[0] = right_time_index[0] - 1
+#         while right.time[right_time_index[1]] > array_peak[1]:
+#             right_time_index[1] = right_time_index[1] - 1
+#         while right.time[right_time_index[1]] < array_peak[1]:
+#             right_time_index[1] = right_time_index[1] + 1
+#         #now bound is at the edge of peak
 
-        #store data
-        length = 50
-        left_time_index[1] = left_time_index[1] - length
-        right_time_index[1] = right_time_index[1] - length
-        while left_time_index[1] < left_time_index[0] and right_time_index[1] < right_time_index[0]:
-            store_data = []
-            for i in range(length):
-                for j in range(3):
-                    store_data.append(left.data['acc'][left_time_index[1]+i][j])
-                for j in range(3):
-                    store_data.append(left.data['att'][left_time_index[1]+i][j])
-                for j in range(3):
-                    store_data.append(left.data['rot'][left_time_index[1]+i][j])
-                for j in range(3):
-                    store_data.append(right.data['acc'][right_time_index[1]+i][j])
-                for j in range(3):
-                    store_data.append(right.data['att'][right_time_index[1]+i][j])
-                for j in range(3):
-                    store_data.append(right.data['rot'][right_time_index[1]+i][j])
-            write_file.write('3 ')#1 means palm
-            print(len(store_data))
-            write_array.append(store_data)
-            for data in store_data:
-                write_file.write(str(data)+' ')
-            write_file.write('\n')
-            # fig, axs = plt.subplots(3, 1)
-            # left_time = left.time[left_time_index[1]: left_time_index[1]+length]
-            # right_time = right.time[left_time_index[1]: left_time_index[1]+length]
-            # left_data = left.data['acc'][left_time_index[1]: left_time_index[1]+length]
-            # right_data = right.data['acc'][left_time_index[1]: left_time_index[1]+length]
-            # axs[0].plot(left_time, [data[0] for data in left_data], right_time, [data[0] for data in right_data])
-            # axs[1].plot(left_time, [data[1] for data in left_data], right_time, [data[1] for data in right_data])
-            # axs[2].plot(left_time, [data[2] for data in left_data], right_time, [data[2] for data in right_data])
-            # plt.show()
-            left_time_index[1] = left_time_index[1] + 1
-            right_time_index[1] = right_time_index[1] + 1
+#         #store data
+#         length = 50
+#         left_time_index[1] = left_time_index[1] - length
+#         right_time_index[1] = right_time_index[1] - length
+#         while left_time_index[1] < left_time_index[0] and right_time_index[1] < right_time_index[0]:
+#             store_data = []
+#             for i in range(length):
+#                 for j in range(3):
+#                     store_data.append(left.data['acc'][left_time_index[1]+i][j])
+#                 for j in range(3):
+#                     store_data.append(left.data['att'][left_time_index[1]+i][j])
+#                 for j in range(3):
+#                     store_data.append(left.data['rot'][left_time_index[1]+i][j])
+#                 for j in range(3):
+#                     store_data.append(right.data['acc'][right_time_index[1]+i][j])
+#                 for j in range(3):
+#                     store_data.append(right.data['att'][right_time_index[1]+i][j])
+#                 for j in range(3):
+#                     store_data.append(right.data['rot'][right_time_index[1]+i][j])
+#             write_file.write('3 ')#1 means palm
+#             print(len(store_data))
+#             write_array.append(store_data)
+#             for data in store_data:
+#                 write_file.write(str(data)+' ')
+#             write_file.write('\n')
+#             # fig, axs = plt.subplots(3, 1)
+#             # left_time = left.time[left_time_index[1]: left_time_index[1]+length]
+#             # right_time = right.time[left_time_index[1]: left_time_index[1]+length]
+#             # left_data = left.data['acc'][left_time_index[1]: left_time_index[1]+length]
+#             # right_data = right.data['acc'][left_time_index[1]: left_time_index[1]+length]
+#             # axs[0].plot(left_time, [data[0] for data in left_data], right_time, [data[0] for data in right_data])
+#             # axs[1].plot(left_time, [data[1] for data in left_data], right_time, [data[1] for data in right_data])
+#             # axs[2].plot(left_time, [data[2] for data in left_data], right_time, [data[2] for data in right_data])
+#             # plt.show()
+#             left_time_index[1] = left_time_index[1] + 1
+#             right_time_index[1] = right_time_index[1] + 1
 
-        #move to next peak
-        left_index = left_index + 1
-        right_index = right_index + 1
-print(overlap_count)
-# left.frequency_show()
-# right.frequency_show()
-fig, axs = plt.subplots(4, 1)
-axs[0].plot(left.time, [data[0] for data in left.data['acc']], right.time, [data[0] for data in right.data['acc']])
-axs[1].plot(left.time, [data[1] for data in left.data['acc']], right.time, [data[1] for data in right.data['acc']])
-axs[2].plot(left.time, [data[2] for data in left.data['acc']], right.time, [data[2] for data in right.data['acc']])
-axs[3].plot(left.time, cover_array)
-plt.show()
+#         #move to next peak
+#         left_index = left_index + 1
+#         right_index = right_index + 1
+# print(overlap_count)
+# # left.frequency_show()
+# # right.frequency_show()
+# fig, axs = plt.subplots(4, 1)
+# axs[0].plot(left.time, [data[0] for data in left.data['acc']], right.time, [data[0] for data in right.data['acc']])
+# axs[1].plot(left.time, [data[1] for data in left.data['acc']], right.time, [data[1] for data in right.data['acc']])
+# axs[2].plot(left.time, [data[2] for data in left.data['acc']], right.time, [data[2] for data in right.data['acc']])
+# axs[3].plot(left.time, cover_array)
+# plt.show()
 
-write_array = np.array(write_array)
-print(np.shape(write_array))
-np.save('training/fist_np', write_array)
+# write_array = np.array(write_array)
+# print(np.shape(write_array))
+# np.save('training/fist_np', write_array)
 
-write_file.close()
-read_file.close()
+# write_file.close()
+# read_file.close()
