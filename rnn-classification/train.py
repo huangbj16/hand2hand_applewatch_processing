@@ -29,9 +29,20 @@ rnn = RNN(n_letters, n_hidden, n_categories)
 optimizer = torch.optim.SGD(rnn.parameters(), lr=learning_rate)
 criterion = nn.NLLLoss()
 
+useCuda = False
+
+if useCuda:
+    print('GPU available')
+    print(torch.cuda.get_device_name(0))
+    rnn = rnn.cuda()
+
 def train(category_tensor, line_tensor):
     hidden = rnn.initHidden()
     optimizer.zero_grad()
+    if useCuda:
+        category_tensor = Variable(category_tensor).cuda()
+        line_tensor = Variable(line_tensor).cuda()
+        hidden = Variable(hidden).cuda()
 
     for i in range(line_tensor.size()[0]):
         output, hidden = rnn(line_tensor[i], hidden)
