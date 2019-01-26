@@ -19,7 +19,7 @@ def isAcc(k):
 
 type_array = []
 
-rootdir = 'D:/2018autumn/hand2hand_apple/training/motion'
+rootdir = 'D:/2018autumn/hand2hand/hand2hand_applewatch_processing/training/motion/'
 list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
 for i in range(0,len(list)):
     path = os.path.join(rootdir,list[i])
@@ -86,7 +86,7 @@ print(feature_set[0])
 clf = SVC(kernel='rbf', gamma='auto')# ‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’
 print(time.time())
 seed = int(time.time()*10000000) % 19980608
-cv =ShuffleSplit(100, test_size=0.2, train_size=0.8, random_state=seed)
+cv =ShuffleSplit(10, test_size=0.2, train_size=0.8, random_state=seed)
 scores = cross_validate(clf, feature_set, flag_set, cv=cv, return_train_score=True, return_estimator=True)
 print(scores['test_score'])
 print('max min mean = :', max(scores['test_score']), min(scores['test_score']), np.mean(scores['test_score']))

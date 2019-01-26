@@ -29,3 +29,27 @@ sequential minimal optimization
 在SVM中引入频率信息用于区分噪声和信号，代价是降低准确率。
 记录足够多种类的噪声（可行性不高）
 在实际信号检测过程中先通过频域滤除大部分噪声，部分高频噪声再作为分类噪声放入分类器。
+
+switchmode训练结果：
+current signal:  0
+max min mean = : 0.9964788732394366 0.9859154929577465 0.9933098591549296
+current signal:  1
+max min mean = : 1.0 0.9964788732394366 0.9996478873239436
+current signal:  2
+max min mean = : 1.0 0.9964788732394366 0.9982394366197184
+current signal:  3
+max min mean = : 1.0 0.9894366197183099 0.9964788732394366
+current signal:  4
+max min mean = : 1.0 0.9894366197183099 0.9943661971830986
+current signal:  5
+max min mean = : 1.0 1.0 1.0
+current signal:  6
+max min mean = : 1.0 1.0 1.0
+current signal:  7
+max min mean = : 0.9964788732394366 0.9859154929577465 0.9947183098591548
+current signal:  8
+max min mean = : 1.0 1.0 1.0
+current signal:  9
+max min mean = : 1.0 0.9859154929577465 0.9943661971830986
+current signal:  10
+max min mean = : 1.0 0.9964788732394366 0.9992957746478872
