@@ -6,7 +6,7 @@ import time
 import math
 
 n_hidden = 128
-n_epochs = 50000
+n_epochs = 10000
 print_every = 500
 learning_rate = 0.001 # If you set this too high, it might explode. If too low, it might not learn
 
@@ -29,7 +29,7 @@ rnn = RNN(n_letters, n_hidden, n_categories)
 optimizer = torch.optim.SGD(rnn.parameters(), lr=learning_rate)
 criterion = nn.NLLLoss()
 
-useCuda = False
+useCuda = True
 
 if useCuda:
     print('GPU available')
