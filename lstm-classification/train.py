@@ -3,6 +3,7 @@ from torch import nn
 from data import *
 from sklearn.model_selection import train_test_split, ShuffleSplit
 import time
+import matplotlib.pyplot as plt
 
 print(n_categories)
 print('categories: ', all_categories)
@@ -11,7 +12,7 @@ print('categories: ', all_categories)
 n_seqlen = 50
 n_inputsize = 18
 n_hidden = 128
-n_epochs = 100
+n_epochs = 2000
 learning_rate = 0.1 # If you set this too high, it might explode. If too low, it might not learn
 
 class Net(nn.Module):
@@ -51,6 +52,9 @@ seed = int(time.time()*10000000) % 19980608
 X_train, X_test, y_train, y_test = train_test_split(feature_set, flag_set, test_size=0.2, random_state=seed)
 print('split result shape: ', X_train.shape, X_test.shape, y_train.shape, y_test.shape)
 
+valid_result = []
+test_result = []
+
 for epoch in range(n_epochs):
     #train
     optimizer.zero_grad()
@@ -64,10 +68,37 @@ for epoch in range(n_epochs):
 
     epoch_y_train = torch.LongTensor(epoch_y_train)
     loss = criterion(output, epoch_y_train)
-    print(loss)
+    # print(loss)
     loss.backward()
     optimizer.step()
 
-    #验证
+    if epoch % 10 == 0:
 
-    #测试
+        #验证
+        X_valid = X_train.reshape(-1, 50, 18)
+        output = net(X_valid)
+        count = 0
+        for i in range(y_train.shape[0]):
+            if y_train[i] == np.argmax(output.data.numpy()[i]):
+                count = count + 1
+        print(count/y_train.shape[0])
+        valid_result.append(count/y_train.shape[0])
+        #测试
+        X_test = X_test.reshape(-1, 50, 18)
+        output = net(X_test)
+        count = 0
+        for i in range(y_test.shape[0]):
+            if y_test[i] == np.argmax(output.data.numpy()[i]):
+                count = count + 1
+        print(count/y_test.shape[0])
+        test_result.append(count/y_test.shape[0])
+
+        if epoch % 100 == 0:
+            print(epoch)
+        #     plt.plot(valid_result)
+        #     plt.plot(test_result)
+        #     plt.show()
+
+plt.plot(valid_result)
+plt.plot(test_result)
+plt.show()
