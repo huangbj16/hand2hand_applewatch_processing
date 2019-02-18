@@ -166,11 +166,11 @@ class Process(object):
 
 
 #initialize
-left = Process('data/motion/log-20190124-palmtopalm-WatchL.txt')
+left = Process('data/motion_lu/log-lu100-RotateWrist-WatchL.txt')
 left.read_data()
 left.preprocess_timing_gap()
 # left.show_single_plot()
-right = Process('data/motion/log-20190124-palmtopalm-WatchR.txt')
+right = Process('data/motion_lu/log-lu100-RotateWrist-WatchR.txt')
 right.read_data()
 right.preprocess_timing_gap()
 # right.show_single_plot()
@@ -186,7 +186,7 @@ right.preprocess_timing_gap()
 #             j = j+1
 
 #address the start timing gap
-FILE_SHIFT = 0.03
+FILE_SHIFT = 0.14
 TIMING_DIFF = left.time[0] - right.time[0]
 right.time = [time+TIMING_DIFF-FILE_SHIFT for time in right.time]
 
@@ -251,7 +251,7 @@ count = 0
 fft_count = 0
 both_count = 0
 THRESHOLD = 10#change
-TIME_THRESHOLD = 3#change
+TIME_THRESHOLD = 1#change
 index_array = np.arange(0, 50)
 store_data_list = []
 
@@ -285,7 +285,7 @@ while left_start + length < len(left.time) and right_start + length < len(right.
             right_bucket[j][(int)((k+5)/10)] = right_bucket[j][(int)((k+5)/10)] + (right_data_fft[j, k])
     is_peak = False
     for j in range(3):
-        if left_bucket[i][1] > THRESHOLD or right_bucket[i][1] > THRESHOLD:
+        if left_bucket[i][1] > THRESHOLD or right_bucket[i][1] > THRESHOLD:#change 现在取的是5-15hz的能量值判断。
             is_peak = True
         break
     if is_peak:
@@ -336,7 +336,7 @@ while left_start + length < len(left.time) and right_start + length < len(right.
 
 store_data_list = np.array(store_data_list)
 print('data size: ', store_data_list.shape)
-np.save('training/motion/palmtopalm_np', store_data_list)
+np.save('training/motion_lu/RotateWrist_np', store_data_list)
 
 fig, axs = plt.subplots(5, 1)
 axs[0].plot(left.time, [data[0] for data in left.data['acc']], right.time, [data[0] for data in right.data['acc']])
