@@ -1,52 +1,97 @@
-"""
-================
-Confusion matrix
-================
-
-Example of confusion matrix usage to evaluate the quality
-of the output of a classifier on the iris data set. The
-diagonal elements represent the number of points for which
-the predicted label is equal to the true label, while
-off-diagonal elements are those that are mislabeled by the
-classifier. The higher the diagonal values of the confusion
-matrix the better, indicating many correct predictions.
-
-The figures show the confusion matrix with and without
-normalization by class support size (number of elements
-in each class). This kind of normalization can be
-interesting in case of class imbalance to have a more
-visual interpretation of which class is being misclassified.
-
-Here the results are not as good as they could be as our
-choice for the regularization parameter C was not the best.
-In real life applications this parameter is usually chosen
-using :ref:`grid_search`.
-
-"""
-
-print(__doc__)
-
-import itertools
 import numpy as np
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split, cross_val_score, cross_validate, cross_val_predict, ShuffleSplit
+from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix
+from sklearn import datasets
+from sklearn.externals import joblib
 import matplotlib.pyplot as plt
+import os
+import time
+from scipy.fftpack import fft,ifft
+import itertools
 
-from sklearn import svm, datasets
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import confusion_matrix
+def isAcc(k):
+    if k >= 6 and k < 9:
+        return True
+    elif k >= 15 and k < 18:
+        return True
+    else:
+        return False
 
-# import some data to play with
-iris = datasets.load_iris()
-X = iris.data
-y = iris.target
-class_names = iris.target_names
+type_array = []
 
+motion_type = []
+
+rootdir = 'D:/2018autumn/hand2hand_apple/training/motion/'
+list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
+for i in range(0, len(list)):
+    motion_type.append(list[i])
+    path = os.path.join(rootdir,list[i])
+    print(path)
+    data = np.load(path)
+    print(data.shape)
+    type_array.append(data)
+print(len(type_array))
+
+rootdir = 'D:/2018autumn/hand2hand_apple/training/motion_lu/'
+list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
+for i in range(0, len(list)):
+    path = os.path.join(rootdir,list[i])
+    print(path)
+    data = np.load(path)
+    print(data.shape)
+    if list[i] in motion_type:
+        mark = motion_type.index(list[i])
+        previous_data = type_array[mark]
+        type_array[mark] = np.concatenate((previous_data, data))
+    else:
+        type_array.append(data)
+print(len(type_array))
+
+feature_array = []
+
+for i in range(len(type_array)):
+    primitive_data = type_array[i]
+    data_length = primitive_data.shape[0]
+    feature_length = 48 #48 features: (left, right) * (acc, att) * (x, y, z) * (min, max, mean, std)
+    # + (left, right) * (acc) * (x, y, z) * (frequency[5:25])
+    featured_data = np.zeros((data_length, feature_length))
+    for j in range(data_length):
+        data_unit = primitive_data[j].reshape(50, 18)
+        for k in range(18):
+            if not isAcc(k):
+                data_unit_coor = data_unit[:, k]
+                if k >= 9:
+                    k = k - 3
+                featured_data[j, 4*k] = np.min(data_unit_coor)
+                featured_data[j, 4*k+1] = np.max(data_unit_coor)
+                featured_data[j, 4*k+2] = np.mean(data_unit_coor)
+                featured_data[j, 4*k+3] = np.std(data_unit_coor)
+    feature_array.append(featured_data)
+
+print(len(feature_array))
+
+type_flag = []
+for i in range(len(type_array)):
+    flag = np.ones((type_array[i].shape[0])) * i
+    print(flag)
+    type_flag.append(flag)
+
+#concatenate
+type_set = np.concatenate(type_array)
+flag_set = np.concatenate(type_flag)
+feature_set = np.concatenate(feature_array)
+print(type_set.shape, flag_set.shape, feature_set.shape)
+
+clf = SVC(kernel='rbf', gamma='auto')# ‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’
+print('current time: ', time.time())
+seed = int(time.time()*10000000) % 19980608
 # Split the data into a training set and a test set
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+X_train, X_test, y_train, y_test = train_test_split(feature_set, flag_set, random_state=seed)
 
 # Run classifier, using a model that is too regularized (C too low) to see
 # the impact on the results
-classifier = svm.SVC(kernel='linear', C=0.01)
-y_pred = classifier.fit(X_train, y_train).predict(X_test)
+y_pred = clf.fit(X_train, y_train).predict(X_test)
 
 
 def plot_confusion_matrix(cm, classes,
@@ -88,14 +133,16 @@ def plot_confusion_matrix(cm, classes,
 cnf_matrix = confusion_matrix(y_test, y_pred)
 np.set_printoptions(precision=2)
 
+class_names = np.arange(18)
+
 # Plot non-normalized confusion matrix
 plt.figure()
 plot_confusion_matrix(cnf_matrix, classes=class_names,
                       title='Confusion matrix, without normalization')
 
 # Plot normalized confusion matrix
-plt.figure()
-plot_confusion_matrix(cnf_matrix, classes=class_names, normalize=True,
-                      title='Normalized confusion matrix')
+# plt.figure()
+# plot_confusion_matrix(cnf_matrix, classes=class_names, normalize=True,
+#                       title='Normalized confusion matrix')
 
 plt.show()
