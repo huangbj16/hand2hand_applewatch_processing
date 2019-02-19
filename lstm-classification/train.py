@@ -102,3 +102,5 @@ for epoch in range(n_epochs):
 plt.plot(valid_result)
 plt.plot(test_result)
 plt.show()
+
+torch.save(net, 'lstm-classification.pt')
