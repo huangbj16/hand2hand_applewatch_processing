@@ -166,11 +166,11 @@ class Process(object):
 
 
 #initialize
-left = Process('data/motion/log-20190218-TxP-WatchL.txt')
+left = Process('data/motion_lu/log-lu100-RotateWrist-WatchL.txt')
 left.read_data()
 left.preprocess_timing_gap()
 # left.show_single_plot()
-right = Process('data/motion/log-20190218-TxP-WatchR.txt')
+right = Process('data/motion_lu/log-lu100-RotateWrist-WatchR.txt')
 right.read_data()
 right.preprocess_timing_gap()
 # right.show_single_plot()
@@ -186,7 +186,7 @@ right.preprocess_timing_gap()
 #             j = j+1
 
 #address the start timing gap
-FILE_SHIFT = -0.04
+FILE_SHIFT = 0
 TIMING_DIFF = left.time[0] - right.time[0]
 right.time = [time+TIMING_DIFF-FILE_SHIFT for time in right.time]
 

@@ -163,17 +163,17 @@ class Process(object):
         print('refine')
 
 #initialize
-left = Process('data/log-hh16hbj-WatchL.txt')
+left = Process('data/offline_test/log-20190219-103603-WatchL.txt')
 left.read_data()
 left.preprocess_timing_gap()
 # left.show_single_plot()
-right = Process('data/log-hh16hbj-WatchR.txt')
+right = Process('data/offline_test/log-20190219-103603-WatchR.txt')
 right.read_data()
 right.preprocess_timing_gap()
 # right.show_single_plot()
 
 #address the start timing gap
-FILE_SHIFT = 0.11
+FILE_SHIFT = 0.066
 TIMING_DIFF = left.time[0] - right.time[0]
 right.time = [time+TIMING_DIFF-FILE_SHIFT for time in right.time]
 
@@ -190,7 +190,7 @@ axs[7].plot(left.time, [data[1] for data in left.data['rot']], right.time, [data
 axs[8].plot(left.time, [data[2] for data in left.data['rot']], right.time, [data[2] for data in right.data['rot']])
 plt.show()
 
-clf = joblib.load("model/classification10_withnoise_model.m")
+clf = joblib.load("model/classification8_withnoise_model.m")
 
 left_start = 0
 right_start = 0
@@ -220,7 +220,7 @@ def find_peak_index(data_unit):
 
 
 length = 50
-offset = 50
+offset = 25
 signal_array = []
 index_array = np.arange(50)
 frequency_threshold = 10
@@ -242,7 +242,22 @@ while left_start + length < len(left.time) and right_start + length < len(right.
                 store_data.append(right.data['rot'][right_start+k][j])
         data_unit = (np.array(store_data)).reshape(50, 18)
         
+        feature_length = 48
+        featured_unit = np.zeros((feature_length))
+        for k in range(18):
+            if not isAcc(k):
+                data_unit_coor = data_unit[:, k]
+                if k >= 9:
+                    k = k - 3
+                featured_unit[4*k] = np.min(data_unit_coor)
+                featured_unit[4*k+1] = np.max(data_unit_coor)
+                featured_unit[4*k+2] = np.mean(data_unit_coor)
+                featured_unit[4*k+3] = np.std(data_unit_coor)
+        res = clf.predict([featured_unit])
+        # print('prediction: ', res[0])
+        signal_array.append(res[0])
         
+        '''
         #fft first
         is_left_signal = False
         is_right_signal = False
@@ -256,20 +271,20 @@ while left_start + length < len(left.time) and right_start + length < len(right.
                 is_right_signal = True
 
         if not (is_left_signal and is_right_signal):
-            feature_length = 48
-            featured_unit = np.zeros((feature_length))
-            for k in range(18):
-                if not isAcc(k):
-                    data_unit_coor = data_unit[:, k]
-                    if k >= 9:
-                        k = k - 3
-                    featured_unit[4*k] = np.min(data_unit_coor)
-                    featured_unit[4*k+1] = np.max(data_unit_coor)
-                    featured_unit[4*k+2] = np.mean(data_unit_coor)
-                    featured_unit[4*k+3] = np.std(data_unit_coor)
-            res = clf.predict([featured_unit])
-            print('prediction: ', res[0])
-            signal_array.append(res[0])
+            # feature_length = 48
+            # featured_unit = np.zeros((feature_length))
+            # for k in range(18):
+            #     if not isAcc(k):
+            #         data_unit_coor = data_unit[:, k]
+            #         if k >= 9:
+            #             k = k - 3
+            #         featured_unit[4*k] = np.min(data_unit_coor)
+            #         featured_unit[4*k+1] = np.max(data_unit_coor)
+            #         featured_unit[4*k+2] = np.mean(data_unit_coor)
+            #         featured_unit[4*k+3] = np.std(data_unit_coor)
+            # res = clf.predict([featured_unit])
+            # signal_array.append(res[0])
+            signal_array.append(0)
         else:
             #if frequency energy is high enough, judge signal
             #align
@@ -282,7 +297,7 @@ while left_start + length < len(left.time) and right_start + length < len(right.
             # print(peak_index)
             left_start = left_start + peak_index
             right_start = right_start + peak_index
-            store_data.clear()
+            store_data = []
             for k in range(length):
                 for j in range(3):
                     store_data.append(left.data['acc'][left_start+k][j])
@@ -310,7 +325,6 @@ while left_start + length < len(left.time) and right_start + length < len(right.
                     featured_unit[4*k+2] = np.mean(data_unit_coor)
                     featured_unit[4*k+3] = np.std(data_unit_coor)
             res = clf.predict([featured_unit])
-            print('prediction: ', res[0])
             signal_array.append(res[0])
 
             #display wrong prediction
@@ -329,10 +343,10 @@ while left_start + length < len(left.time) and right_start + length < len(right.
             #     for i in range(9):
             #         axs[i].plot(display_index, display_data[:, i], display_index, display_data[:, 9+i])
             #     plt.show()
+        '''
     except:
-        # print(store_data)
         print('NaN error')
-        signal_array.append(7)
+        signal_array.append(0)
         break
     finally:
         left_start = left_start + offset

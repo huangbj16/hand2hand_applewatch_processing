@@ -23,7 +23,7 @@ type_array = []
 
 motion_type = []
 
-rootdir = 'D:/2018autumn/hand2hand/hand2hand_applewatch_processing/training/motion/'
+rootdir = 'D:/2018autumn/hand2hand/hand2hand_applewatch_processing/training/subset_motion/'
 list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
 for i in range(0, len(list)):
     motion_type.append(list[i])
@@ -34,7 +34,7 @@ for i in range(0, len(list)):
     type_array.append(data)
 print(len(type_array))
 
-rootdir = 'D:/2018autumn/hand2hand/hand2hand_applewatch_processing/training/motion_lu/'
+rootdir = 'D:/2018autumn/hand2hand/hand2hand_applewatch_processing/training/subset_motion_lu/'
 list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
 for i in range(0, len(list)):
     path = os.path.join(rootdir,list[i])

@@ -160,11 +160,11 @@ class Process(object):
 
 
 #initialize
-left = Process('data/log-hh16hbj-WatchL.txt')
+left = Process('data/motion/log-hbj-presentation_noise-WatchL.txt')
 left.read_data()
 left.preprocess_timing_gap()
 # left.show_single_plot()
-right = Process('data/log-hh16hbj-WatchR.txt')
+right = Process('data/motion/log-hbj-presentation_noise-WatchR.txt')
 right.read_data()
 right.preprocess_timing_gap()
 # right.show_single_plot()
@@ -189,7 +189,7 @@ plt.show()
 
 noise_array = []
 
-i = 6000
+i = 0#change
 length = 50
 print(len(left.time))
 while i+50 < len(left.time):
@@ -223,7 +223,7 @@ while i+50 < len(left.time):
 
 noise_array = np.array(noise_array)
 print(np.shape(noise_array))
-np.save('training/noise_16_np', noise_array)
+np.save('training/motion_lu/0_noise_np.npy', noise_array)
 
 
 # fig, axs = plt.subplots(3, 1)
