@@ -190,7 +190,7 @@ axs[7].plot(left.time, [data[1] for data in left.data['rot']], right.time, [data
 axs[8].plot(left.time, [data[2] for data in left.data['rot']], right.time, [data[2] for data in right.data['rot']])
 plt.show()
 
-clf = joblib.load("model/classification8_withnoise_model.m")
+clf = joblib.load("model/classification24_withnoise_model.m")
 
 left_start = 0
 right_start = 0
@@ -201,10 +201,26 @@ while abs(left.time[left_start] - right.time[right_start]) > 0.01:
         right_start = right_start + 1
 print('start_time: ', left_start, left.time[left_start], right_start, right.time[right_start])
 
-def isAcc(k):
+def isRot(k):
     if k >= 6 and k < 9:
         return True
     elif k >= 15 and k < 18:
+        return True
+    else:
+        return False
+
+def isAcc(k):
+    if k >= 0 and k < 3:
+        return True
+    elif k >= 9 and k < 12:
+        return True
+    else:
+        return False
+
+def isAtt(k):
+    if k >= 3 and k < 6:
+        return True
+    elif k >= 12 and k < 15:
         return True
     else:
         return False
@@ -242,20 +258,31 @@ while left_start + length < len(left.time) and right_start + length < len(right.
                 store_data.append(right.data['rot'][right_start+k][j])
         data_unit = (np.array(store_data)).reshape(50, 18)
         
-        feature_length = 24
+        feature_length = 48
         featured_unit = np.zeros((feature_length))
         for k in range(18):
-            if not isAcc(k):
+            if not isRot(k):
                 data_unit_coor = data_unit[:, k]
                 if k >= 9:
                     k = k - 3
-                featured_unit[2*k] = np.min(data_unit_coor)
-                featured_unit[2*k+1] = np.max(data_unit_coor)
-                # featured_unit[4*k+2] = np.mean(data_unit_coor)
-                # featured_unit[4*k+3] = np.std(data_unit_coor)
+                featured_unit[4*k] = (int(np.min(data_unit_coor) * 1000)) / 1000
+                featured_unit[4*k+1] = (int(np.max(data_unit_coor) * 1000)) / 1000
+                featured_unit[4*k+2] = (int(np.mean(data_unit_coor) * 1000)) / 1000
+                featured_unit[4*k+3] = (int(np.std(data_unit_coor) * 1000)) / 1000
+        # print(featured_unit.shape)
         res = clf.predict([featured_unit])
         # print('prediction: ', res[0])
-        signal_array.append(res[0])
+        if res[0] == 0:
+            signal_array.append(res[0])
+        else:
+            peak_index = find_peak_index(data_unit)
+            if abs(peak_index) < 12:
+                signal_array.append(res[0])
+            else:
+                signal_array.append(0)
+
+
+
         
         '''
         #fft first

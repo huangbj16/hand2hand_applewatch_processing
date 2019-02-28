@@ -22,7 +22,7 @@ type_array = []
 
 motion_type = []
 
-rootdir = 'D:/2018autumn/hand2hand_apple/training/motion/'
+rootdir = 'training/motion/'
 list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
 for i in range(0, len(list)):
     motion_type.append(list[i])
@@ -33,7 +33,7 @@ for i in range(0, len(list)):
     type_array.append(data)
 print(len(type_array))
 
-rootdir = 'D:/2018autumn/hand2hand_apple/training/motion_lu/'
+rootdir = 'training/motion_lu/'
 list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
 for i in range(0, len(list)):
     path = os.path.join(rootdir,list[i])
@@ -87,7 +87,8 @@ clf = SVC(kernel='rbf', gamma='auto')# ‘linear’, ‘poly’, ‘rbf’, ‘s
 print('current time: ', time.time())
 seed = int(time.time()*10000000) % 19980608
 # Split the data into a training set and a test set
-X_train, X_test, y_train, y_test = train_test_split(feature_set, flag_set, random_state=seed)
+X_train, X_test, y_train, y_test = train_test_split(feature_set, flag_set, test_size = 0.2, random_state=seed)
+
 
 # Run classifier, using a model that is too regularized (C too low) to see
 # the impact on the results
@@ -109,6 +110,10 @@ def plot_confusion_matrix(cm, classes,
         print('Confusion matrix, without normalization')
 
     print(cm)
+    
+    #clear diagonal values
+    for index in classes:
+        cm[index][index] = 0
 
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
@@ -133,7 +138,7 @@ def plot_confusion_matrix(cm, classes,
 cnf_matrix = confusion_matrix(y_test, y_pred)
 np.set_printoptions(precision=2)
 
-class_names = np.arange(18)
+class_names = np.arange(24)
 
 # Plot non-normalized confusion matrix
 plt.figure()
