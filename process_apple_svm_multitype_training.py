@@ -9,13 +9,30 @@ import os
 import time
 from scipy.fftpack import fft,ifft
 
-def isAcc(k):
+def isRot(k):
     if k >= 6 and k < 9:
         return True
     elif k >= 15 and k < 18:
         return True
     else:
         return False
+
+def isAcc(k):
+    if k >= 0 and k < 3:
+        return True
+    elif k >= 9 and k < 12:
+        return True
+    else:
+        return False
+
+def isAtt(k):
+    if k >= 3 and k < 6:
+        return True
+    elif k >= 12 and k < 15:
+        return True
+    else:
+        return False
+
 
 type_array = []
 
@@ -58,14 +75,18 @@ for i in range(len(type_array)):
     for j in range(data_length):
         data_unit = primitive_data[j].reshape(50, 18)
         for k in range(18):
-            if not isAcc(k):
+            if not isRot(k):
                 data_unit_coor = data_unit[:, k]
+                # if isAcc(k):
+                #     data_unit_coor = data_unit_coor / 10
+                # elif isAtt(k):
+                #     data_unit_coor = data_unit_coor / 3
                 if k >= 9:
                     k = k - 3
-                featured_data[j, 4*k] = np.min(data_unit_coor)
-                featured_data[j, 4*k+1] = np.max(data_unit_coor)
-                featured_data[j, 4*k+2] = np.mean(data_unit_coor)
-                featured_data[j, 4*k+3] = np.std(data_unit_coor)
+                featured_data[j, 4*k] = (int(np.min(data_unit_coor) * 1000)) / 1000
+                featured_data[j, 4*k+1] = (int(np.max(data_unit_coor) * 1000)) / 1000
+                featured_data[j, 4*k+2] = (int(np.mean(data_unit_coor) * 1000)) / 1000
+                featured_data[j, 4*k+3] = (int(np.std(data_unit_coor) * 1000)) / 1000
         # for k in range(3):
         #     col = data_unit[:, k]
         #     col_fft = abs(fft(col))
@@ -79,6 +100,7 @@ for i in range(len(type_array)):
 
 
 print(len(feature_array))
+
 
 type_flag = []
 for i in range(len(type_array)):
@@ -104,7 +126,7 @@ print(feature_set)
 clf = SVC(kernel='rbf', gamma='auto')# ‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’
 print('current time: ', time.time())
 seed = int(time.time()*10000000) % 19980608
-cv =ShuffleSplit(100, test_size=0.2, train_size=0.8, random_state=seed)
+cv =ShuffleSplit(10, test_size=0.2, train_size=0.8, random_state=seed)
 scores = cross_validate(clf, feature_set, flag_set, cv=cv, return_train_score=True, return_estimator=True)
 print(scores['test_score'])
 print('max min mean = :', max(scores['test_score']), min(scores['test_score']), np.mean(scores['test_score']))

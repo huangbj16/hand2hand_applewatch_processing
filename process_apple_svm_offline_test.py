@@ -242,17 +242,17 @@ while left_start + length < len(left.time) and right_start + length < len(right.
                 store_data.append(right.data['rot'][right_start+k][j])
         data_unit = (np.array(store_data)).reshape(50, 18)
         
-        feature_length = 48
+        feature_length = 24
         featured_unit = np.zeros((feature_length))
         for k in range(18):
             if not isAcc(k):
                 data_unit_coor = data_unit[:, k]
                 if k >= 9:
                     k = k - 3
-                featured_unit[4*k] = np.min(data_unit_coor)
-                featured_unit[4*k+1] = np.max(data_unit_coor)
-                featured_unit[4*k+2] = np.mean(data_unit_coor)
-                featured_unit[4*k+3] = np.std(data_unit_coor)
+                featured_unit[2*k] = np.min(data_unit_coor)
+                featured_unit[2*k+1] = np.max(data_unit_coor)
+                # featured_unit[4*k+2] = np.mean(data_unit_coor)
+                # featured_unit[4*k+3] = np.std(data_unit_coor)
         res = clf.predict([featured_unit])
         # print('prediction: ', res[0])
         signal_array.append(res[0])

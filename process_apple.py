@@ -166,11 +166,11 @@ class Process(object):
 
 
 #initialize
-left = Process('data/motion_lu/log-lu100-RotateWrist-WatchL.txt')
+left = Process('data/motion_lu/log-lu100-PxP-WatchL.txt')
 left.read_data()
 left.preprocess_timing_gap()
 # left.show_single_plot()
-right = Process('data/motion_lu/log-lu100-RotateWrist-WatchR.txt')
+right = Process('data/motion_lu/log-lu100-PxP-WatchR.txt')
 right.read_data()
 right.preprocess_timing_gap()
 # right.show_single_plot()
@@ -336,7 +336,7 @@ while left_start + length < len(left.time) and right_start + length < len(right.
 
 store_data_list = np.array(store_data_list)
 print('data size: ', store_data_list.shape)
-np.save('training/motion/TxP_np', store_data_list)
+np.save('training/motion/PxP_np', store_data_list)
 
 fig, axs = plt.subplots(5, 1)
 axs[0].plot(left.time, [data[0] for data in left.data['acc']], right.time, [data[0] for data in right.data['acc']])
