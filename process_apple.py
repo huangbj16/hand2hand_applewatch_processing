@@ -166,11 +166,11 @@ class Process(object):
 
 
 #initialize
-left = Process('data/motion/log-20190227-SxP-WatchL.txt')
+left = Process('data/motion/log-20190218-IyG-WatchL.txt')
 left.read_data()
 left.preprocess_timing_gap()
 # left.show_single_plot()
-right = Process('data/motion/log-20190227-SxP-WatchR.txt')
+right = Process('data/motion/log-20190218-IyG-WatchR.txt')
 right.read_data()
 right.preprocess_timing_gap()
 # right.show_single_plot()
@@ -186,7 +186,7 @@ right.preprocess_timing_gap()
 #             j = j+1
 
 #address the start timing gap
-FILE_SHIFT = 0.18
+FILE_SHIFT = -2.17
 TIMING_DIFF = left.time[0] - right.time[0]
 right.time = [time+TIMING_DIFF-FILE_SHIFT for time in right.time]
 
@@ -244,14 +244,24 @@ while abs(left.time[left_start] - right.time[right_start]) > 0.01:
         right_start = right_start + 1
 print('start_time: ', left_start, left.time[left_start], right_start, right.time[right_start])
 
+
+def find_peak_index(data_unit):
+    data_length = data_unit.shape[0]
+    norm_unit = np.zeros((data_length, 2))
+    for i in range(data_length):
+        norm_unit[i, 0] = np.linalg.norm(data_unit[i, 0:3])
+        norm_unit[i, 1] = np.linalg.norm(data_unit[i, 9:12])
+    # print(norm_unit)
+    return int (np.argmax(norm_unit) / 2) - 25
+
 length = 50
 cover_array = []
 fft_cover_array = []
 count = 0
 fft_count = 0
 both_count = 0
-THRESHOLD = 20#change
-TIME_THRESHOLD = 2#change
+THRESHOLD = 6#change
+TIME_THRESHOLD = 0.6#change
 index_array = np.arange(0, 50)
 store_data_list = []
 
@@ -298,9 +308,9 @@ while left_start + length < len(left.time) and right_start + length < len(right.
         #double confirm, no align currently
         both_count = both_count + 1
         #align
-        peak_index = np.argmax(np.fabs(right_data[1])) - 25 - int(random.random()*20-10)#change
-        left_start = left_start + peak_index
-        right_start = right_start + peak_index
+        # peak_index = np.argmax(np.fabs(right_data[1])) - 25 - int(random.random()*20-10)#change
+        # left_start = left_start + peak_index
+        # right_start = right_start + peak_index
         left_data = (np.array(left.data['acc'][left_start: left_start+length])).T
         right_data = (np.array(right.data['acc'][right_start: right_start+length])).T
         # fig, axs = plt.subplots(3, 1)
@@ -322,6 +332,24 @@ while left_start + length < len(left.time) and right_start + length < len(right.
                 store_data.append(right.data['att'][right_start+i][j])
             for j in range(3):
                 store_data.append(right.data['rot'][right_start+i][j])
+        data_unit = (np.array(store_data)).reshape(50, 18)
+        peak_index = find_peak_index(data_unit) + int(random.random()*20-10)
+        left_start = left_start + peak_index
+        right_start = right_start + peak_index
+        store_data = []
+        for k in range(length):
+            for j in range(3):
+                store_data.append(left.data['acc'][left_start+k][j])
+            for j in range(3):
+                store_data.append(left.data['att'][left_start+k][j])
+            for j in range(3):
+                store_data.append(left.data['rot'][left_start+k][j])
+            for j in range(3):
+                store_data.append(right.data['acc'][right_start+k][j])
+            for j in range(3):
+                store_data.append(right.data['att'][right_start+k][j])
+            for j in range(3):
+                store_data.append(right.data['rot'][right_start+k][j])
         store_data_list.append(store_data)
     #move to next
     left_start = left_start + length
@@ -334,9 +362,9 @@ while left_start + length < len(left.time) and right_start + length < len(right.
             else:
                 right_start = right_start + 1
 
-store_data_list = np.array(store_data_list)
+store_data_list = np.array(store_data_list)[5:]
 print('data size: ', store_data_list.shape)
-np.save('training/motion/SxP_np', store_data_list)
+np.save('training/motion/log-20190218-IyG-WatchL_np', store_data_list)
 
 fig, axs = plt.subplots(5, 1)
 axs[0].plot(left.time, [data[0] for data in left.data['acc']], right.time, [data[0] for data in right.data['acc']])
@@ -347,6 +375,23 @@ axs[4].plot(fft_cover_array)
 plt.show()
 
 print(count, fft_count, both_count)
+
+for i in range(store_data_list.shape[0]):
+    data_unit = store_data_list[i].reshape(50, 18)
+    dimension = 18
+    
+    fig, axs = plt.subplots(9, 2)
+    plt.setp(axs, ylim=(-5, 5))
+
+    for j in range(dimension):
+        # if j < 3:
+        #     axs[j%3][int(j/3)].plot(data_unit[:, j])
+        # else:
+        #     axs[j%3][int(j/3)].plot(data_unit[:, j+6])
+        axs[j%9][int(j/9)].plot(data_unit[:, j])
+    
+    plt.show()
+
 
 #find peak by data after fft
 # def overlap(x, y):

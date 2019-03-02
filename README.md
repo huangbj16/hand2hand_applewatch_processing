@@ -19,6 +19,10 @@ IxFG（食指敲击指根关节）/ IxB / PxB无法区分，三者att基本相�
 
 下一步准备尝试更改feature，看能不能用带sync的feature，比如corr之类的。
 
+2019/3/2 log
+增加数据展示功能，用于通过肉眼观察不同动作在信号上的区别。
+观察得知，IyP的动作acc确实太小。
+IxFG（食指敲击指根关节）/ IxB / PxB 在acc和rot上的变化极其相似，区别可能是峰值的幅度。
 
 By Bingjian Huang
 

@@ -77,10 +77,6 @@ for i in range(len(type_array)):
         for k in range(18):
             if not isRot(k):
                 data_unit_coor = data_unit[:, k]
-                # if isAcc(k):
-                #     data_unit_coor = data_unit_coor / 10
-                # elif isAtt(k):
-                #     data_unit_coor = data_unit_coor / 3
                 if k >= 9:
                     k = k - 3
                 featured_data[j, 4*k] = (int(np.min(data_unit_coor) * 1000)) / 1000
@@ -126,7 +122,7 @@ print(feature_set)
 clf = SVC(kernel='rbf', gamma='auto')# ‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’
 print('current time: ', time.time())
 seed = int(time.time()*10000000) % 19980608
-cv =ShuffleSplit(10, test_size=0.2, train_size=0.8, random_state=seed)
+cv =ShuffleSplit(100, test_size=0.2, train_size=0.8, random_state=seed)
 scores = cross_validate(clf, feature_set, flag_set, cv=cv, return_train_score=True, return_estimator=True)
 print(scores['test_score'])
 print('max min mean = :', max(scores['test_score']), min(scores['test_score']), np.mean(scores['test_score']))
