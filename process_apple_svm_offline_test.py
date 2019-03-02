@@ -258,17 +258,16 @@ while left_start + length < len(left.time) and right_start + length < len(right.
                 store_data.append(right.data['rot'][right_start+k][j])
         data_unit = (np.array(store_data)).reshape(50, 18)
         
-        feature_length = 48
+        feature_length = 72
         featured_unit = np.zeros((feature_length))
         for k in range(18):
-            if not isRot(k):
-                data_unit_coor = data_unit[:, k]
-                if k >= 9:
-                    k = k - 3
-                featured_unit[4*k] = (int(np.min(data_unit_coor) * 1000)) / 1000
-                featured_unit[4*k+1] = (int(np.max(data_unit_coor) * 1000)) / 1000
-                featured_unit[4*k+2] = (int(np.mean(data_unit_coor) * 1000)) / 1000
-                featured_unit[4*k+3] = (int(np.std(data_unit_coor) * 1000)) / 1000
+            # if not isRot(k):
+            data_unit_coor = data_unit[:, k]
+            featured_unit[4*k] = (int(np.min(data_unit_coor) * 1000)) / 1000
+            featured_unit[4*k+1] = (int(np.max(data_unit_coor) * 1000)) / 1000
+            featured_unit[4*k+2] = (int(np.mean(data_unit_coor) * 1000)) / 1000
+            featured_unit[4*k+3] = (int(np.std(data_unit_coor) * 1000)) / 1000
+
         # print(featured_unit.shape)
         res = clf.predict([featured_unit])
         # print('prediction: ', res[0])

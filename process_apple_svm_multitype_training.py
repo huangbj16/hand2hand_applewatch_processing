@@ -69,20 +69,18 @@ feature_array = []
 for i in range(len(type_array)):
     primitive_data = type_array[i]
     data_length = primitive_data.shape[0]
-    feature_length = 48 #48 features: (left, right) * (acc, att) * (x, y, z) * (min, max, mean, std)
+    feature_length = 72 #72 features: (left, right) * (acc, att, rot) * (x, y, z) * (min, max, mean, std)
     # + (left, right) * (acc) * (x, y, z) * (frequency[5:25])
     featured_data = np.zeros((data_length, feature_length))
     for j in range(data_length):
         data_unit = primitive_data[j].reshape(50, 18)
         for k in range(18):
-            if not isRot(k):
-                data_unit_coor = data_unit[:, k]
-                if k >= 9:
-                    k = k - 3
-                featured_data[j, 4*k] = (int(np.min(data_unit_coor) * 1000)) / 1000
-                featured_data[j, 4*k+1] = (int(np.max(data_unit_coor) * 1000)) / 1000
-                featured_data[j, 4*k+2] = (int(np.mean(data_unit_coor) * 1000)) / 1000
-                featured_data[j, 4*k+3] = (int(np.std(data_unit_coor) * 1000)) / 1000
+            # if not isRot(k):
+            data_unit_coor = data_unit[:, k]
+            featured_data[j, 4*k] = (int(np.min(data_unit_coor) * 1000)) / 1000
+            featured_data[j, 4*k+1] = (int(np.max(data_unit_coor) * 1000)) / 1000
+            featured_data[j, 4*k+2] = (int(np.mean(data_unit_coor) * 1000)) / 1000
+            featured_data[j, 4*k+3] = (int(np.std(data_unit_coor) * 1000)) / 1000
         # for k in range(3):
         #     col = data_unit[:, k]
         #     col_fft = abs(fft(col))
@@ -122,7 +120,7 @@ print(feature_set)
 clf = SVC(kernel='rbf', gamma='auto')# ‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’
 print('current time: ', time.time())
 seed = int(time.time()*10000000) % 19980608
-cv =ShuffleSplit(100, test_size=0.2, train_size=0.8, random_state=seed)
+cv =ShuffleSplit(10, test_size=0.2, train_size=0.8, random_state=seed)
 scores = cross_validate(clf, feature_set, flag_set, cv=cv, return_train_score=True, return_estimator=True)
 print(scores['test_score'])
 print('max min mean = :', max(scores['test_score']), min(scores['test_score']), np.mean(scores['test_score']))
