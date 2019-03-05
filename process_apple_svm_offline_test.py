@@ -163,17 +163,17 @@ class Process(object):
         print('refine')
 
 #initialize
-left = Process('data/offline_test/log-20190219-103603-WatchL.txt')
+left = Process('data/sound/log-IyP(urdl)-WatchL.txt')
 left.read_data()
 left.preprocess_timing_gap()
 # left.show_single_plot()
-right = Process('data/offline_test/log-20190219-103603-WatchR.txt')
+right = Process('data/sound/log-IyP(urdl)-WatchR.txt')
 right.read_data()
 right.preprocess_timing_gap()
 # right.show_single_plot()
 
 #address the start timing gap
-FILE_SHIFT = 0.066
+FILE_SHIFT = 0.035
 TIMING_DIFF = left.time[0] - right.time[0]
 right.time = [time+TIMING_DIFF-FILE_SHIFT for time in right.time]
 
@@ -190,7 +190,7 @@ axs[7].plot(left.time, [data[1] for data in left.data['rot']], right.time, [data
 axs[8].plot(left.time, [data[2] for data in left.data['rot']], right.time, [data[2] for data in right.data['rot']])
 plt.show()
 
-clf = joblib.load("model/classification24_withnoise_model.m")
+clf = joblib.load("model/classification5_IyPsubset_model.m")
 
 left_start = 0
 right_start = 0

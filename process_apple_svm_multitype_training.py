@@ -38,7 +38,7 @@ type_array = []
 
 motion_type = []
 
-rootdir = 'training/motion/'
+rootdir = 'training/IyPset_motion/'
 list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
 for i in range(0, len(list)):
     motion_type.append(list[i])
@@ -49,7 +49,7 @@ for i in range(0, len(list)):
     type_array.append(data)
 print(len(type_array))
 
-rootdir = 'training/motion_lu/'
+rootdir = 'training/IyPset_motion_lu/'
 list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
 for i in range(0, len(list)):
     path = os.path.join(rootdir,list[i])
@@ -125,7 +125,7 @@ scores = cross_validate(clf, feature_set, flag_set, cv=cv, return_train_score=Tr
 print(scores['test_score'])
 print('max min mean = :', max(scores['test_score']), min(scores['test_score']), np.mean(scores['test_score']))
 # print(min(scores), max(scores), np.mean(scores))
-joblib.dump(scores['estimator'][np.argmax(scores['test_score'])], "model/classification24_withnoise_model.m")
+joblib.dump(scores['estimator'][np.argmax(scores['test_score'])], "model/classification5_IyPsubset_model.m")
 
 '''
 motion = np.load('training/palm_np.npy')
