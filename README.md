@@ -38,6 +38,11 @@ IyP四个方向的滑动，声音信号非常弱(<0.01)，频域能量也非常�
 今天希望能完成数据切割，测试正确率。
 发现采集程序的一个bug，sensor和audio时间长度不同，audio提前停了，原因不明，需要汇报。
 
+2019/3/12 log
+audio analysis 基本完成，发现了未对齐的问题，需要解决。
+论文方案出现了路线性分歧，design or technique?
+手动查看数据内容，分析acc和att
+
 By Bingjian Huang
 
 

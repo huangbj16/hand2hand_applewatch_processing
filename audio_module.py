@@ -17,8 +17,8 @@ class AudioProcess(object):
         print('sampling: ', sampling_freq)
         self.audio = audio / (2.**15)
         self.sampling_freq = sampling_freq
-        plt.plot(self.audio)
-        plt.show()
+        # plt.plot(self.audio)
+        # plt.show()
 
     def frequency_transform(self):
         fft_size = 22050
