@@ -43,6 +43,9 @@ audio analysis 基本完成，发现了未对齐的问题，需要解决。
 论文方案出现了路线性分歧，design or technique?
 手动查看数据内容，分析acc和att
 
+2019/3/13 log
+已解决audio analysis的问题。
+
 By Bingjian Huang
 
 
