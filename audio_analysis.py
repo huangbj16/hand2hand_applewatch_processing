@@ -8,22 +8,21 @@ from python_speech_features  import mfcc
 import random
 
 #initialize
-left_sensor = Process('data/sound/log-20190310-IxB-WatchL.txt')
+left_sensor = Process('data/sound/lyq/log-PxP-WatchL.txt')
 left_sensor.read_data()
 left_sensor.preprocess_timing_gap()
 # left.show_single_plot()
-right_sensor = Process('data/sound/log-20190310-IxB-WatchR.txt')
+right_sensor = Process('data/sound/lyq/log-PxP-WatchR.txt')
 right_sensor.read_data()
 right_sensor.preprocess_timing_gap()
 
-FILE_SHIFT = 0
 TIMING_DIFF = left_sensor.time[0] - right_sensor.time[0]
-right_sensor.time = [time+TIMING_DIFF-FILE_SHIFT for time in right_sensor.time]
+right_sensor.time = [time+TIMING_DIFF for time in right_sensor.time]
 
-left_audio = AudioProcess('data/sound/log-20190310-IxB-WatchL.wav')
+left_audio = AudioProcess('data/sound/lyq/log-PxP-WatchL.wav')
 left_audio.frequency_transform()
 left_audio.mfcc_transform()
-right_audio = AudioProcess('data/sound/log-20190310-IxB-WatchR.wav')
+right_audio = AudioProcess('data/sound/lyq/log-PxP-WatchR.wav')
 right_audio.frequency_transform()
 right_audio.mfcc_transform()
 
@@ -39,50 +38,61 @@ left_sensor_start = 0
 right_sensor_start = 0
 left_audio_start = 0
 right_audio_start = 0
+is_autoalign = False#change
 #auto align
-autoalign_threshold_sensor = 5
-autoalign_threshold_audio = 0.5
-for unit_index in range(len(left_sensor.time)):
-    unit = left_sensor.data['acc'][unit_index]
-    if np.max(np.fabs(unit)) > autoalign_threshold_sensor:
-        #pick the peak
-        segment = left_sensor.data['acc'][unit_index-25: unit_index+25]
-        segment_index = np.argmax(np.fabs(segment))
-        print(segment_index)
-        left_sensor_start = unit_index + segment_index % 50 + 100
-        break
-for unit_index in range(len(right_sensor.time)):
-    unit = right_sensor.data['acc'][unit_index]
-    if np.max(np.fabs(unit)) > autoalign_threshold_sensor:
-        #pick the peak
-        segment = right_sensor.data['acc'][unit_index-25: unit_index+25]
-        segment_index = np.argmax(np.fabs(segment)) 
-        print(segment_index)
-        right_sensor_start = unit_index + segment_index % 50 + 100
-        break
-for unit_index in range(len(left_audio.audio)):
-    unit = left_audio.audio[unit_index]
-    if np.max(np.fabs(unit)) > autoalign_threshold_audio:
-        #pick the peak
-        segment = left_audio.audio[unit_index-11025: unit_index+11025]
-        segment_index = np.argmax(np.fabs(segment)) % 22050
-        left_audio_start = unit_index + segment_index + 44100
-        break
-for unit_index in range(len(right_audio.audio)):
-    unit = right_audio.audio[unit_index]
-    if np.max(np.fabs(unit)) > autoalign_threshold_audio:
-        #pick the peak
-        segment = right_audio.audio[unit_index-11025: unit_index+11025]
-        segment_index = np.argmax(np.fabs(segment)) % 22050
-        right_audio_start = unit_index + segment_index + 44100
-        break
+if is_autoalign:
+    autoalign_threshold_sensor = 5
+    autoalign_threshold_audio = 0.5
+    for unit_index in range(len(left_sensor.time)):
+        unit = left_sensor.data['acc'][unit_index]
+        if np.max(np.fabs(unit)) > autoalign_threshold_sensor:
+            #pick the peak
+            segment = left_sensor.data['acc'][unit_index-25: unit_index+25]
+            segment_index = np.argmax(np.fabs(segment))
+            print(segment_index)
+            left_sensor_start = unit_index + segment_index % 50 + 100
+            break
+    for unit_index in range(len(right_sensor.time)):
+        unit = right_sensor.data['acc'][unit_index]
+        if np.max(np.fabs(unit)) > autoalign_threshold_sensor:
+            #pick the peak
+            segment = right_sensor.data['acc'][unit_index-25: unit_index+25]
+            segment_index = np.argmax(np.fabs(segment)) 
+            print(segment_index)
+            right_sensor_start = unit_index + segment_index % 50 + 100
+            break
+    for unit_index in range(len(left_audio.audio)):
+        unit = left_audio.audio[unit_index]
+        if np.max(np.fabs(unit)) > autoalign_threshold_audio:
+            #pick the peak
+            segment = left_audio.audio[unit_index-11025: unit_index+11025]
+            segment_index = np.argmax(np.fabs(segment)) % 22050
+            left_audio_start = unit_index + segment_index + 44100
+            break
+    for unit_index in range(len(right_audio.audio)):
+        unit = right_audio.audio[unit_index]
+        if np.max(np.fabs(unit)) > autoalign_threshold_audio:
+            #pick the peak
+            segment = right_audio.audio[unit_index-11025: unit_index+11025]
+            segment_index = np.argmax(np.fabs(segment)) % 22050
+            right_audio_start = unit_index + segment_index + 44100
+            break
+else:
+    left_sensor_start = 149 - 50
+    right_sensor_start = 135 - 50
+    left_audio_start = 31262 - 22050
+    right_audio_start = 26393 - 22050
 
 print('autoalign result: ', left_sensor_start, right_sensor_start, left_audio_start, right_audio_start)
+print('start time: ', left_sensor.time[left_sensor_start], right_sensor.time[right_sensor_start])
+TIMING_DIFF = left_sensor.time[left_sensor_start] - right_sensor.time[right_sensor_start]
+right_sensor.time = [time+TIMING_DIFF for time in right_sensor.time]
+print('start time: ', left_sensor.time[left_sensor_start], right_sensor.time[right_sensor_start])
 
 fig, axs = plt.subplots(4, 1)
-axs[0].plot(range(len(left_sensor.time)-left_sensor_start), [data[0] for data in left_sensor.data['acc'][left_sensor_start:]], range(len(right_sensor.time)-right_sensor_start), [data[0] for data in right_sensor.data['acc'][right_sensor_start:]])
-axs[1].plot(range(len(left_sensor.time)-left_sensor_start), [data[1] for data in left_sensor.data['acc'][left_sensor_start:]], range(len(right_sensor.time)-right_sensor_start), [data[1] for data in right_sensor.data['acc'][right_sensor_start:]])
-axs[2].plot(range(len(left_sensor.time)-left_sensor_start), [data[2] for data in left_sensor.data['acc'][left_sensor_start:]], range(len(right_sensor.time)-right_sensor_start), [data[2] for data in right_sensor.data['acc'][right_sensor_start:]])
+axs[0].plot(left_sensor.time[left_sensor_start:], [data[0] for data in left_sensor.data['acc'][left_sensor_start:]], right_sensor.time[right_sensor_start:], [data[0] for data in right_sensor.data['acc'][right_sensor_start:]])
+axs[1].plot(left_sensor.time[left_sensor_start:], [data[1] for data in left_sensor.data['acc'][left_sensor_start:]], right_sensor.time[right_sensor_start:], [data[1] for data in right_sensor.data['acc'][right_sensor_start:]])
+axs[2].plot(left_sensor.time[left_sensor_start:], [data[2] for data in left_sensor.data['acc'][left_sensor_start:]], right_sensor.time[right_sensor_start:], [data[2] for data in right_sensor.data['acc'][right_sensor_start:]])
 axs[3].plot(range(left_audio.audio.shape[0]-left_audio_start), left_audio.audio[left_audio_start:], range(right_audio.audio.shape[0]-right_audio_start), right_audio.audio[right_audio_start:])
 plt.show()
 
@@ -115,10 +125,10 @@ right_audio_index = right_audio_start
 #detection
 print('detectiondetectiondetectiondetection')
 AUDIO_FREQ = 44100
-SENSOR_FFT_THRESHOLD = 20#change
-SENSOR_TIME_THRESHOLD = 1.5#change
+SENSOR_FFT_THRESHOLD = 50#change
+SENSOR_TIME_THRESHOLD = 4#change
 AUDIO_FFT_THRESHOLD = 20#change
-AUDIO_TIME_THRESHOLD = 0.05#change
+AUDIO_TIME_THRESHOLD = 0.4#change
 
 length = 50
 offset = 25
@@ -258,13 +268,13 @@ while left_sensor_index + length < len(left_sensor.time) and right_sensor_index 
             gesture_cover_array.append(1)
             
             # display
-            fig, axs = plt.subplots(4, 2)
-            for i in range(3):
-                axs[i][0].plot(left_sensor_segment[i])
-                axs[i][1].plot(right_sensor_segment[i])
-            axs[3][0].plot(left_audio_segment)
-            axs[3][1].plot(right_audio_segment)
-            plt.show()
+            # fig, axs = plt.subplots(4, 2)
+            # for i in range(3):
+            #     axs[i][0].plot(left_sensor_segment[i])
+            #     axs[i][1].plot(right_sensor_segment[i])
+            # axs[3][0].plot(left_audio_segment)
+            # axs[3][1].plot(right_audio_segment)
+            # plt.show()
 
         else:
             gesture_cover_array.append(0)
@@ -293,5 +303,5 @@ axs[5].plot(audio_cover_array)
 axs[6].plot(gesture_cover_array)
 plt.show()
 
-np.save('training/sound/IxB_np', store_data_list)
+np.save('training/sound/lyq/PxP_np', store_data_list)
 

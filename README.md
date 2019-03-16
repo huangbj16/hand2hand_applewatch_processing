@@ -46,6 +46,15 @@ audio analysis 基本完成，发现了未对齐的问题，需要解决。
 2019/3/13 log
 已解决audio analysis的问题。
 
+2019/3/16 log
+学长给的数据没有auto_align……gg……
+要写手动对齐的代码，同时发现了原来对齐中出现的问题。
+增加了基于起始点的对齐方式，得到三组数据。
+
+尝试通过freq_audio来分类，通过mfcc来分类。
+分类效果皆不佳，开始找原因。
+把IxB猜成了PxB
+
 By Bingjian Huang
 
 
