@@ -55,6 +55,15 @@ audio analysis 基本完成，发现了未对齐的问题，需要解决。
 分类效果皆不佳，开始找原因。
 把IxB猜成了PxB
 
+2019/3/18 log
+继续查看声音特征
+手动查看了声音特征，取了时域数据的min max mean std，准确率到95%
+频率Bucket，无效果，改进方向：log bucket。
+提取了freq argrelmax 即极大值频率，作为分类依据，准确率max min mean = : 0.9487179487179487 0.6153846153846154 0.8253846153846154
+
+采集数据：2*PxP FDxP DxP mucus FDxB DxB
+记得以后采数据要先拍一下手！！！autoalign！！！
+
 By Bingjian Huang
 
 
