@@ -57,13 +57,32 @@ audio analysis 基本完成，发现了未对齐的问题，需要解决。
 
 2019/3/18 log
 继续查看声音特征
-手动查看了声音特征，取了时域数据的min max mean std，准确率到95%
+手动查看了声音特征，取了时域数据的min max mean std，而份额里准确率到95%
 频率Bucket，无效果，改进方向：log bucket。
 提取了freq argrelmax 即极大值频率，作为分类依据，准确率max min mean = : 0.9487179487179487 0.6153846153846154 0.8253846153846154
 
 采集数据：2*PxP FDxP DxP mucus FDxB DxB
 记得以后采数据要先拍一下手！！！autoalign！！！
 
+2019/3/19 log
+昨天采集并处理完了数据，
+今天仍然使用了find peak的方法分类，发现效果很一般。
+查阅了一些论文，如
+    Design and Implementation of Frequency Domain Feature Extraction Module for Human Motion Recognition
+    AMP: a new time-frequency feature extraction method for intermittent time-series data
+得到了一些处理的灵感，尝试了STFT，发现有点意思，说不定能有效果。
+
+接下来尝试log bucket
+log bucket：限制在40个feature以内，一只手20个，log均分到5000，0 10 20 40 80 160 320 640 1280 2560 5120
+归一化之后，
+1-norm仍然很差，
+但是2-norm效果特别好，7分类max min mean = : 0.9333333333333333 0.7523809523809524 0.8477142857142858
+通过查看confusion matrix，发现容易混淆的手势为D和FD在各个面的碰撞，以及无法解释的FDxP和PxB
+尝试 np.mean+std，不行，频域上出现了负数的能量。
+尝试用一个人的数据预测另一个人的，3分类0.56，不合理。
+
+尝试STFT：如何使用STFT的二维矩阵信息？
+
+看其它声音论文是否有使用频域上的特征？？
+
 By Bingjian Huang
-
-

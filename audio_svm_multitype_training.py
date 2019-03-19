@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split, cross_val_score, cross_validate, cross_val_predict, ShuffleSplit
-from sklearn.metrics import precision_score, recall_score, f1_score
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 from sklearn import datasets
 from sklearn.externals import joblib
 import matplotlib.pyplot as plt
@@ -10,6 +10,7 @@ import time
 from scipy.fftpack import fft,ifft
 from scipy.misc import electrocardiogram
 from scipy.signal import find_peaks
+from scipy import signal
 from python_speech_features  import mfcc
 
 
@@ -100,20 +101,35 @@ for i in range(len(type_array)):
     bound = 20
     feature_length = 20
     featured_data = np.zeros((data_length, feature_length))
+    print('type:', motion_type[i])
     for j in range(data_length):
         segment = primitive_data[j]
         data_unit = segment[0:900].reshape(50, 18)
         audio_left = segment[900:900+22050]
         audio_right = segment[900+22050:900+44100]
-        freq_audio_left = np.array(abs(fft(audio_left)))[:5000]
-        freq_audio_right = np.array(abs(fft(audio_right)))[:5000]
+        freq_audio_left = np.array(abs(fft(audio_left)))
+        freq_audio_right = np.array(abs(fft(audio_right)))
+
+        
+        # freq_audio_left = freq_audio_left[:5000]
+        # freq_audio_right = freq_audio_right[:5000]
+
+        ##############feature: stft
+        ##############display
+        fs = 44100
+        f, t, Zxx = signal.stft(audio_left, fs, nperseg=100)
+        plt.pcolormesh(t, f[:10], np.abs(Zxx)[:10], vmin=np.min(audio_left), vmax=np.max(audio_left))
+        plt.title('STFT Magnitude')
+        plt.ylabel('Frequency [Hz]')
+        plt.xlabel('Time [sec]')
+        plt.show()
 
         ##############feature: peaks in audio freq
-        peaks_left, _ = find_peaks(freq_audio_left, distance=100, height=5)
-        peaks_right, _ = find_peaks(freq_audio_right, distance=100, height=5)        
+        # peaks_left, _ = find_peaks(freq_audio_left, distance=100, height=1)
+        # peaks_right, _ = find_peaks(freq_audio_right, distance=100, height=1)        
         ##############display
-        # if i == 0:
-        #     continue
+        # if i != 1:
+        #     break
         # print(peaks_left, peaks_right)
         # fig, axs = plt.subplots(2, 1)        
         # axs[0].plot(freq_audio_left)
@@ -123,21 +139,35 @@ for i in range(len(type_array)):
         # plt.show()
         # continue
         ##############complement and curtail to 10
-        comple_array = np.ones((10), dtype=np.int)*(-100)
-        if peaks_left.shape[0] < 10:
-            peaks_left = np.append(peaks_left, comple_array)
-        if peaks_right.shape[0] < 10:
-            peaks_right = np.append(peaks_right, comple_array)
-        featured_data[j, :10] = peaks_left[:10]
-        featured_data[j, 10:20] = peaks_right[:10]
+        # comple_array = np.ones((10), dtype=np.int)*(-100)
+        # if peaks_left.shape[0] < 10:
+        #     peaks_left = np.append(peaks_left, comple_array)
+        # if peaks_right.shape[0] < 10:
+        #     peaks_right = np.append(peaks_right, comple_array)
+        # featured_data[j, :10] = peaks_left[:10]
+        # featured_data[j, 10:20] = peaks_right[:10]
 
+
+        ##############feature: bucket
+        ######normalize
+        # freq_audio_left = freq_audio_left / np.linalg.norm(freq_audio_left)
+        # freq_audio_right = freq_audio_right / np.linalg.norm(freq_audio_right)
+        # bucket_index = [0, 100, 200, 400, 800, 1600, 2400, 3200, 11025]
+        # for k in range(len(bucket_index)-1):
+        #     lower_bound = bucket_index[k]
+        #     upper_bound = bucket_index[k+1]
+        #     featured_data[j, k] = np.sum(freq_audio_left[lower_bound:upper_bound])
+        #     featured_data[j, 10+k] = np.sum(freq_audio_right[lower_bound:upper_bound])
+
+        ##############feature: uniform bucket
         # freq_energy_audio_left = np.sum(freq_audio_left, axis=1)
         # freq_energy_audio_right = np.sum(freq_audio_right, axis=1)
         # print(freq_energy_audio_left.shape, freq_energy_audio_right.shape)
-
         # featured_data[j, 0:bound] = freq_energy_audio_left[0:bound]
         # featured_data[j, bound:2*bound] = freq_energy_audio_right[0:bound]
         
+
+        ##############feature: mfcc
         # sampling_freq = 44100
         # fft_size = 22050
         # mfcc_left = mfcc(audio_left, samplerate=sampling_freq, winlen=0.25, winstep=0.125, nfft=fft_size)
@@ -146,6 +176,8 @@ for i in range(len(type_array)):
         # featured_data[j, 0:bound] = mfcc_left.reshape(-1)
         # featured_data[j, bound:2*bound] = mfcc_right.reshape(-1)
 
+
+        ###############feature: brute force audio
         # featured_data[j] = segment[900:]
         
         
@@ -190,6 +222,16 @@ print(type_set.shape, flag_set.shape, feature_set.shape)
 print(feature_set)
 
 clf = SVC(kernel='rbf', gamma='auto')# ‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’
+
+################use p1 data to predict p2 data
+# X_train = np.concatenate((feature_set[0:46], feature_set[92:142], feature_set[192:275]))
+# y_train = np.concatenate((flag_set[0:46], flag_set[92:142], flag_set[192:275]))
+# X_test = np.concatenate((feature_set[46:92], feature_set[142:192], feature_set[275:325]))
+# y_test = np.concatenate((flag_set[46:92], flag_set[142:192], flag_set[275:325]))
+# y_pred = clf.fit(X_train, y_train).predict(X_test)
+# print(accuracy_score(y_test, y_pred))
+# exit(0)
+
 print('current time: ', time.time())
 seed = int(time.time()*10000000) % 19980608
 cv =ShuffleSplit(100, test_size=0.2, train_size=0.8, random_state=seed)
@@ -197,5 +239,5 @@ scores = cross_validate(clf, feature_set, flag_set, cv=cv, return_train_score=Tr
 print(scores['test_score'])
 print('max min mean = :', max(scores['test_score']), min(scores['test_score']), np.mean(scores['test_score']))
 # print(min(scores), max(scores), np.mean(scores))
-joblib.dump(scores['estimator'][np.argmax(scores['test_score'])], "model/classification5_IyPsubset_model.m")
+joblib.dump(scores['estimator'][np.argmax(scores['test_score'])], "model/classification_audio_model.m")
 
