@@ -1,0 +1,83 @@
+FingerPing:
+	通过在手腕和手指上增加声音发送装置和接受装置，识别拇指和其它手指捏合的动作，精度达到每个手指关节都可以。
+	缺点：每个人的手结构不同导致无法得到统一的一个reference gesture，需要每个用户都设置一个参考信号。
+	频域卡阈值的方法找出pose，
+	分类recognition：
+		we then extract 35 features, namely: 
+		zero crossing rate, energy, entropy, spectral centroid, spectral ?ux, 
+		spectral chroma, spectral roll-off, and Mel-frequency cepstral coef?cients
+		dominant frequency and its energy, 
+		as well as spectral energy bins from 100 Hz to 5500 Hz as extracted throughtheFFT
+
+iDial:
+	The key idea is to exploit the acoustic signatures extracted from passive subtle acoustic signals to 
+	accurately recognize the virtual keys input on the skin of the hand back. 
+	We innovatively locate the virtual keys on the 4 pieces of metacarpal bones to signi?cantly reduce the possibility of casual inputs. 
+	iDial also takes advantages of the motion sensor fusion already available inside the wearable 
+	to achieve robustness against the ambient noise and human voices efficiently. 
+	通过手表上的声音和motion检测点击手背掌骨的动作，作为一个虚拟的输入表盘。
+	不怎么耗电！ iDial incurs very little battery consumption
+	敲击掌骨的音频信息基本在400Hz以下。必要的话可以降低采样频率
+	环境噪声会对识别产生影响，加入acc信号的震荡作为敲击的二次确认。
+	声音信息的提取：amplitude spectrum density(ASD)和MFCC。
+	
+SoundCraft:
+	通过麦克风阵列实现空中动作方位的精确识别，
+	For (iii), we introduce wrist twists as a “trigger gesture” detected by the IMU 使用转手腕作为环境更新的手势。
+
+viband: Chris Harrison
+	用4000hz的手表加速度传感器识别High-Fidelity Bio-Acoustic，
+	study包括gesture recognition，object recognition和data transfer
+
+Hand Gesture and On-body Touch Recognition  by Active Acoustic Sensing throughout the Human Body 
+	用自制的设备识别手势和点击皮肤的操作。
+	We achieved them by observing the frequency spectrum of the wave propagated in the body, around the periphery of the wrist. 
+	加一块橡皮，防止手表位置变化To prevent slipping the transducers’ position, we put a 1mm-thick silicon rubber sheet between a sensor case and the wrist. 
+	识别用的是200hz能量，100个feature，rbfsvm。For classifications, we collected 100 features from the frequency spectrum at a 200Hz interval in the sweep range. 
+	We used a SVM implementation provided by the LIBSVM in the MATLAB (RBF kernel with default parameters) 
+
+A Wearable Hand Gesture Recognition Device Based On Acoustic Measurements At Wrist 	
+	Linear Discriminant Analysis (LDA)分类方法效果最好。
+	十个不同的特征Feature extraction:  Root mean square, mean absolute value, waveform length, variance, log detector, skew, kurtosis, maxima, difference absolute standard deviation value, and median frequency were extracted as features in this preliminary study [12-14]. These features provided 10 elements for each sensor, and hence 50 elements for feature vector of a single trial. At the end, feature matrices of 931x50, 1041x50 and 1017x50 were obtained for subject 1, 2 and 3 respectively.  
+
+Acoustic Sensor Based Recognition of Human Activity in Everyday Life for Smart Home Services
+	不好参考
+
+Detecting and Classifying Human Touches in a Social Robot Through Acoustic Sensing and Machine Learning
+	识别动作可以用一些特征：touch activity detection. as Signal To Noise Ratio (SNR, in dB), Zero Crossing Rate (ZCR), or Volume (computed using the Root Mean Square amplitude, or just RMS, in watts). The window size is of 256 samples, and the sample rate is 44,100 Hz. 
+	三个维度的识别特征提取： fft dwt
+		The ones related to the time domain are directly obtained from the sampled analog signal acquired from the microphone. 
+		In the case of features belonging to the frequency domain, the Fast Fourier Transform (FFT) is applied to the time-domain signal [26]. 
+		Finally, features related to the time-frequency domain signal are obtained applying the Discrete Haar Wavelet Transform (DWT) [27] (see Figure 4).
+	使用了以下特征：The audio features employed in the Feature Extraction component. We are using the 
+	maximum, minimum, and average values of pitch, ?ux, roll-off, centroid, ZCR, RMS, and SNR. Since, a total of 23 features are extracted for each instance/gesture
+	在分类的时候，Logistic Model Trees表现的最好。
+
+Device-Free Gesture TrackingUsing Acoustic Signals
+	通过发射器和接收器的相位差来计算距离，无法使用。
+
+
+TapSkin
+	Event Detection：卡阈值，然后根据最大值居中，如果不居中就等下一个window，和我的做法相同。
+	IMU的特征：
+		we extracted a set of statistical features including the 
+		maximum, minimum, mean, median, standard deviation, 
+		root-mean-square(RMS), variance, zero-crossing rate, and the values of peaks and their differences
+		We also perform a Fast Fourier Transform (FFT) on the gyroscope data (50 points), 
+		which results in 24 features (abandoned the ?rst bin) for each axis. 
+	Acoustic的特征：
+		We ?rst extract 26 Mel-frequency cepstral coef?cients (MFCC) features
+		fft的value
+	FalsePositive的原因：太轻太重，数据没有对齐。
+	IMU的分类效果比起声音好多了。IMU data provides more discriminative power than the acoustic data
+
+
+
+
+
+
+
+
+启发：说不定可以支持主动发出的声音来识别手的形态？？模仿Fadel的无线传感的工作。
+The voiced speech of a typical adult male will have a fundamental frequency from 85 to 180 Hz, and that of a typical adult female from 165 to 255 Hz.
+Motivation：gesture plane for wearable e.g. watch
