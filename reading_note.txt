@@ -7,7 +7,7 @@ FingerPing:
 		zero crossing rate, energy, entropy, spectral centroid, spectral ?ux, 
 		spectral chroma, spectral roll-off, and Mel-frequency cepstral coef?cients
 		dominant frequency and its energy, 
-		as well as spectral energy bins from 100 Hz to 5500 Hz as extracted throughtheFFT
+		as well as spectral energy bins from 100 Hz to 5500 Hz as extracted through the FFT
 
 iDial:
 	The key idea is to exploit the acoustic signatures extracted from passive subtle acoustic signals to 
@@ -38,7 +38,8 @@ Hand Gesture and On-body Touch Recognition  by Active Acoustic Sensing throughou
 
 A Wearable Hand Gesture Recognition Device Based On Acoustic Measurements At Wrist 	
 	Linear Discriminant Analysis (LDA)分类方法效果最好。
-	十个不同的特征Feature extraction:  Root mean square, mean absolute value, waveform length, variance, log detector, skew, kurtosis, maxima, difference absolute standard deviation value, and median frequency were extracted as features in this preliminary study [12-14]. These features provided 10 elements for each sensor, and hence 50 elements for feature vector of a single trial. At the end, feature matrices of 931x50, 1041x50 and 1017x50 were obtained for subject 1, 2 and 3 respectively.  
+	十个不同的特征Feature extraction:  Root mean square, mean absolute value, waveform length, variance, log detector, skew, kurtosis, maxima, difference absolute standard deviation value, and median frequency were extracted as features in this preliminary study [12-14]. 
+	These features provided 10 elements for each sensor, and hence 50 elements for feature vector of a single trial. At the end, feature matrices of 931x50, 1041x50 and 1017x50 were obtained for subject 1, 2 and 3 respectively.  
 
 Acoustic Sensor Based Recognition of Human Activity in Everyday Life for Smart Home Services
 	不好参考
@@ -70,8 +71,6 @@ TapSkin
 		fft的value
 	FalsePositive的原因：太轻太重，数据没有对齐。
 	IMU的分类效果比起声音好多了。IMU data provides more discriminative power than the acoustic data
-
-
 
 
 

@@ -99,7 +99,7 @@ for i in range(len(type_array)):
     primitive_data = type_array[i]
     data_length = primitive_data.shape[0]
     bound = 20
-    feature_length = 20
+    feature_length = 14
     featured_data = np.zeros((data_length, feature_length))
     print('type:', motion_type[i])
     for j in range(data_length):
@@ -110,19 +110,44 @@ for i in range(len(type_array)):
         freq_audio_left = np.array(abs(fft(audio_left)))
         freq_audio_right = np.array(abs(fft(audio_right)))
 
-        
+        # from Detecting and Classifying Human Touches in a Social Robot Through Acoustic Sensing and Machine Learning
+        # maximum, minimum, and average values of pitch, flux, roll-off, centroid, ZCR, RMS, and SNR.
+        audio_max = [np.max(audio_left), np.max(audio_right)]
+        audio_min = [np.min(audio_left), np.min(audio_right)]
+        audio_mean = [np.mean(audio_left), np.mean(audio_right)]
+        audio_std = [np.std(audio_left), np.std(audio_right)]
+        root_mean_square = [np.sqrt(((audio_left).astype('double') ** 2).mean()), np.sqrt(((audio_right).astype('double') ** 2).mean())]
+        # zero_crossing_rate = [0, 0]
+        # for k in range(len(audio_left)-1):
+        #     if audio_left
+        freq_audio_left = freq_audio_left[:11025]
+        freq_audio_right = freq_audio_right[:11025]
+        freq_energy = [np.sum(freq_audio_left), np.sum(freq_audio_right)]
+        roll_off = [-1, -1]
+        tot = [0, 0]
+        for k in range(11025):
+            tot[0] = tot[0] + freq_audio_left[k]
+            tot[1] = tot[1] + freq_audio_right[k]
+            if tot[0] > freq_energy[0] * 0.95 and roll_off[0] == -1:
+                roll_off[0] = k
+            if tot[1] > freq_energy[1] * 0.95 and roll_off[1] == -1:
+                roll_off[1] = k
+        freq_index = np.arange(11025)
+        centroid = [np.sum(freq_audio_left*freq_index) / np.sum(freq_audio_left), np.sum(freq_audio_right*freq_index) / np.sum(freq_audio_right)]
+        featured_data[j] = np.concatenate((audio_max, audio_min, audio_mean, audio_std, root_mean_square, roll_off, centroid))
+
         # freq_audio_left = freq_audio_left[:5000]
         # freq_audio_right = freq_audio_right[:5000]
 
         ##############feature: stft
         ##############display
-        fs = 44100
-        f, t, Zxx = signal.stft(audio_left, fs, nperseg=100)
-        plt.pcolormesh(t, f[:10], np.abs(Zxx)[:10], vmin=np.min(audio_left), vmax=np.max(audio_left))
-        plt.title('STFT Magnitude')
-        plt.ylabel('Frequency [Hz]')
-        plt.xlabel('Time [sec]')
-        plt.show()
+        # fs = 44100
+        # f, t, Zxx = signal.stft(audio_left, fs, nperseg=100)
+        # plt.pcolormesh(t, f[:10], np.abs(Zxx)[:10], vmin=np.min(audio_left), vmax=np.max(audio_left))
+        # plt.title('STFT Magnitude')
+        # plt.ylabel('Frequency [Hz]')
+        # plt.xlabel('Time [sec]')
+        # plt.show()
 
         ##############feature: peaks in audio freq
         # peaks_left, _ = find_peaks(freq_audio_left, distance=100, height=1)
@@ -198,6 +223,14 @@ for i in range(len(type_array)):
 print(len(feature_array))
 
 # exit(0)
+
+##################display
+for featured_data in feature_array:
+    print(featured_data.shape)
+    fig, axs = plt.subplots(7, 2) 
+    for i in range(featured_data.shape[1]):
+        axs[int(i/2)][int(i%2)].plot(featured_data[:, i])
+    plt.show()
 
 ###################label process
 type_flag = []

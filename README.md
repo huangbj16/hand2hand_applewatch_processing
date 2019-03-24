@@ -86,6 +86,11 @@ log bucket：限制在40个feature以内，一只手20个，log均分到5000，0
 看其它声音论文是否有使用频域上的特征？？
 今天读了十篇声音相关的论文，总结了哪些feature可以使用。
 
+2019/3/24 log
+尝试之前总结的feature
+模仿了Detecting论文，使用了maximum, minimum, and average values of pitch, flux, roll-off, centroid, ZCR, RMS, and SNR的特征，效果一般。
+接下来尝试mfcc和stft。
+
 尝试STFT：如何使用STFT的二维矩阵信息？
 
 
