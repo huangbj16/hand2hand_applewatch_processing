@@ -88,12 +88,18 @@ log bucket：限制在40个feature以内，一只手20个，log均分到5000，0
 
 2019/3/24 log
 尝试之前总结的feature
-模仿了Detecting论文，使用了maximum, minimum, and average values of pitch, flux, roll-off, centroid, ZCR, RMS, and SNR的特征，效果一般。
+模仿了Detecting论文，使用了maximum, minimum, and average values of pitch, flux, roll-off, centroid, ZCR, RMS, and SNR的特征，效果一般。max min mean = : 0.6944444444444444 0.3055555555555556 0.47055555555555556
+
 接下来尝试mfcc和stft。
+尝试了mfcc，手动查看了结果，区别极小，mfcc结果保存在pic中。
 
-尝试STFT：如何使用STFT的二维矩阵信息？
+STFT归一化之后能够很好地区分IxB和PxB，IxB的特征在STFT中极为明显。
+尝试STFT：如何使用STFT的二维矩阵信息？将所有时间取max，然后取前十个freq。
 
-
+todo：
+mfcc的归一化
+上面feature的归一化
+还有LSTM
 如何解决双击的识别？
 
 By Bingjian Huang

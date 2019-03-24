@@ -98,8 +98,8 @@ feature_array = []
 for i in range(len(type_array)):
     primitive_data = type_array[i]
     data_length = primitive_data.shape[0]
-    bound = 20
-    feature_length = 14
+    bound = 10
+    feature_length = 20
     featured_data = np.zeros((data_length, feature_length))
     print('type:', motion_type[i])
     for j in range(data_length):
@@ -112,42 +112,55 @@ for i in range(len(type_array)):
 
         # from Detecting and Classifying Human Touches in a Social Robot Through Acoustic Sensing and Machine Learning
         # maximum, minimum, and average values of pitch, flux, roll-off, centroid, ZCR, RMS, and SNR.
-        audio_max = [np.max(audio_left), np.max(audio_right)]
-        audio_min = [np.min(audio_left), np.min(audio_right)]
-        audio_mean = [np.mean(audio_left), np.mean(audio_right)]
-        audio_std = [np.std(audio_left), np.std(audio_right)]
-        root_mean_square = [np.sqrt(((audio_left).astype('double') ** 2).mean()), np.sqrt(((audio_right).astype('double') ** 2).mean())]
-        # zero_crossing_rate = [0, 0]
-        # for k in range(len(audio_left)-1):
-        #     if audio_left
-        freq_audio_left = freq_audio_left[:11025]
-        freq_audio_right = freq_audio_right[:11025]
-        freq_energy = [np.sum(freq_audio_left), np.sum(freq_audio_right)]
-        roll_off = [-1, -1]
-        tot = [0, 0]
-        for k in range(11025):
-            tot[0] = tot[0] + freq_audio_left[k]
-            tot[1] = tot[1] + freq_audio_right[k]
-            if tot[0] > freq_energy[0] * 0.95 and roll_off[0] == -1:
-                roll_off[0] = k
-            if tot[1] > freq_energy[1] * 0.95 and roll_off[1] == -1:
-                roll_off[1] = k
-        freq_index = np.arange(11025)
-        centroid = [np.sum(freq_audio_left*freq_index) / np.sum(freq_audio_left), np.sum(freq_audio_right*freq_index) / np.sum(freq_audio_right)]
-        featured_data[j] = np.concatenate((audio_max, audio_min, audio_mean, audio_std, root_mean_square, roll_off, centroid))
+        # audio_max = [np.max(audio_left), np.max(audio_right)]
+        # audio_min = [np.min(audio_left), np.min(audio_right)]
+        # audio_mean = [np.mean(audio_left), np.mean(audio_right)]
+        # audio_std = [np.std(audio_left), np.std(audio_right)]
+        # root_mean_square = [np.sqrt(((audio_left).astype('double') ** 2).mean()), np.sqrt(((audio_right).astype('double') ** 2).mean())]
+        # # zero_crossing_rate = [0, 0]
+        # # for k in range(len(audio_left)-1):
+        # #     if audio_left
+        # freq_audio_left = freq_audio_left[:11025]
+        # freq_audio_right = freq_audio_right[:11025]
+        # freq_energy = [np.sum(freq_audio_left), np.sum(freq_audio_right)]
+        # roll_off = [-1, -1]
+        # tot = [0, 0]
+        # for k in range(11025):
+        #     tot[0] = tot[0] + freq_audio_left[k]
+        #     tot[1] = tot[1] + freq_audio_right[k]
+        #     if tot[0] > freq_energy[0] * 0.95 and roll_off[0] == -1:
+        #         roll_off[0] = k
+        #     if tot[1] > freq_energy[1] * 0.95 and roll_off[1] == -1:
+        #         roll_off[1] = k
+        # freq_index = np.arange(11025)
+        # centroid = [np.sum(freq_audio_left*freq_index) / np.sum(freq_audio_left), np.sum(freq_audio_right*freq_index) / np.sum(freq_audio_right)]
+        # featured_data[j] = np.concatenate((audio_max, audio_min, audio_mean, audio_std, root_mean_square, roll_off, centroid))
 
         # freq_audio_left = freq_audio_left[:5000]
         # freq_audio_right = freq_audio_right[:5000]
 
         ##############feature: stft
         ##############display
-        # fs = 44100
-        # f, t, Zxx = signal.stft(audio_left, fs, nperseg=100)
-        # plt.pcolormesh(t, f[:10], np.abs(Zxx)[:10], vmin=np.min(audio_left), vmax=np.max(audio_left))
+        fs = 44100
+        f, t, Zxx = signal.stft(audio_left, fs, nperseg=100)
+        Zxx = np.abs(Zxx)
+        Zxx = np.amax(Zxx, axis=1)
+        Zxx = Zxx / np.linalg.norm(Zxx)
+        featured_data[j, 0:bound] = Zxx[:10]
+        f, t, Zxx = signal.stft(audio_right, fs, nperseg=100)
+        Zxx = np.abs(Zxx)
+        Zxx = np.amax(Zxx, axis=1)
+        Zxx = Zxx / np.linalg.norm(Zxx)
+        featured_data[j, bound:] = Zxx[:10]
+        
+        # print(f.shape, t.shape, Zxx.shape)
+        # print(f[:5], t[:5], Zxx[0][0])
+        # plt.pcolormesh(t, f[:5], np.abs(Zxx)[:5], vmin=np.min(audio_left), vmax=np.max(audio_left))
         # plt.title('STFT Magnitude')
         # plt.ylabel('Frequency [Hz]')
         # plt.xlabel('Time [sec]')
         # plt.show()
+        
 
         ##############feature: peaks in audio freq
         # peaks_left, _ = find_peaks(freq_audio_left, distance=100, height=1)
@@ -177,7 +190,7 @@ for i in range(len(type_array)):
         ######normalize
         # freq_audio_left = freq_audio_left / np.linalg.norm(freq_audio_left)
         # freq_audio_right = freq_audio_right / np.linalg.norm(freq_audio_right)
-        # bucket_index = [0, 100, 200, 400, 800, 1600, 2400, 3200, 11025]
+        # bucket_index = [0, 100, 200, 400, 800, 1600, 2400, 3200, 4000, 6400, 11025]
         # for k in range(len(bucket_index)-1):
         #     lower_bound = bucket_index[k]
         #     upper_bound = bucket_index[k+1]
@@ -198,9 +211,12 @@ for i in range(len(type_array)):
         # mfcc_left = mfcc(audio_left, samplerate=sampling_freq, winlen=0.25, winstep=0.125, nfft=fft_size)
         # mfcc_right = mfcc(audio_right, samplerate=sampling_freq, winlen=0.25, winstep=0.125, nfft=fft_size)
         # # print(mfcc_left.shape, mfcc_right.shape)
-        # featured_data[j, 0:bound] = mfcc_left.reshape(-1)
-        # featured_data[j, bound:2*bound] = mfcc_right.reshape(-1)
-
+        # # print(np.mean(mfcc_left, axis=0).shape)
+        # # exit(0)
+        # # featured_data[j, 0:bound] = mfcc_left.reshape(-1)
+        # # featured_data[j, bound:2*bound] = mfcc_right.reshape(-1)
+        # featured_data[j, 0:bound] = np.amax(mfcc_left, axis=0)
+        # featured_data[j, bound:2*bound] = np.amax(mfcc_right, axis=0)
 
         ###############feature: brute force audio
         # featured_data[j] = segment[900:]
@@ -225,12 +241,19 @@ print(len(feature_array))
 # exit(0)
 
 ##################display
+fig, axs = plt.subplots(len(feature_array), 1)
+index = 0
 for featured_data in feature_array:
     print(featured_data.shape)
-    fig, axs = plt.subplots(7, 2) 
-    for i in range(featured_data.shape[1]):
-        axs[int(i/2)][int(i%2)].plot(featured_data[:, i])
-    plt.show()
+    # fig, axs = plt.subplots(13, 2) 
+    # for i in range(featured_data.shape[1]):
+    #     axs[int(i/2)][int(i%2)].plot(featured_data[:, i])
+    # plt.show()
+    # fig, axs = plt.subplots(5, 1)
+    for segment in featured_data:
+        axs[index].plot(segment)
+    index = index + 1
+plt.show()
 
 ###################label process
 type_flag = []
