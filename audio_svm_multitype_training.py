@@ -55,20 +55,20 @@ for i in range(0, len(list)):
 print(len(type_array))
 
 
-rootdir = 'training/sound/lyq'
-list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
-for i in range(0, len(list)):
-    path = os.path.join(rootdir,list[i])
-    print(path)
-    data = np.load(path)
-    print(data.shape)
-    if list[i] in motion_type:
-        mark = motion_type.index(list[i])
-        previous_data = type_array[mark]
-        type_array[mark] = np.concatenate((previous_data, data))
-    else:
-        type_array.append(data)
-        motion_type.append(list[i])
+# rootdir = 'training/sound/lyq'
+# list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
+# for i in range(0, len(list)):
+#     path = os.path.join(rootdir,list[i])
+#     print(path)
+#     data = np.load(path)
+#     print(data.shape)
+#     if list[i] in motion_type:
+#         mark = motion_type.index(list[i])
+#         previous_data = type_array[mark]
+#         type_array[mark] = np.concatenate((previous_data, data))
+#     else:
+#         type_array.append(data)
+#         motion_type.append(list[i])
 print(len(type_array))
 print(motion_type)
 

@@ -8,21 +8,21 @@ from python_speech_features  import mfcc
 import random
 
 #initialize
-left_sensor = Process('data/sound/hbj/log-20190318-PxP2-WatchL.txt')
+left_sensor = Process('data/sound/hbj/log-20190325-IyPright-WatchL.txt')
 left_sensor.read_data()
 left_sensor.preprocess_timing_gap()
 # left.show_single_plot()
-right_sensor = Process('data/sound/hbj/log-20190318-PxP2-WatchR.txt')
+right_sensor = Process('data/sound/hbj/log-20190325-IyPright-WatchR.txt')
 right_sensor.read_data()
 right_sensor.preprocess_timing_gap()
 
 TIMING_DIFF = left_sensor.time[0] - right_sensor.time[0]
 right_sensor.time = [time+TIMING_DIFF for time in right_sensor.time]
 
-left_audio = AudioProcess('data/sound/hbj/log-20190318-PxP2-WatchL.wav')
+left_audio = AudioProcess('data/sound/hbj/log-20190325-IyPright-WatchL.wav')
 left_audio.frequency_transform()
 left_audio.mfcc_transform()
-right_audio = AudioProcess('data/sound/hbj/log-20190318-PxP2-WatchR.wav')
+right_audio = AudioProcess('data/sound/hbj/log-20190325-IyPright-WatchR.wav')
 right_audio.frequency_transform()
 right_audio.mfcc_transform()
 
@@ -38,7 +38,7 @@ left_sensor_start = 0
 right_sensor_start = 0
 left_audio_start = 0
 right_audio_start = 0
-is_autoalign = False#change
+is_autoalign = True#change
 #auto align
 if is_autoalign:
     autoalign_threshold_sensor = 5
@@ -125,10 +125,10 @@ right_audio_index = right_audio_start
 #detection
 print('detectiondetectiondetectiondetection')
 AUDIO_FREQ = 44100
-SENSOR_FFT_THRESHOLD = 30#change
-SENSOR_TIME_THRESHOLD = 1.5#change
-AUDIO_FFT_THRESHOLD = 30#change
-AUDIO_TIME_THRESHOLD = 0.1#change
+SENSOR_FFT_THRESHOLD = 5#change
+SENSOR_TIME_THRESHOLD = 0.5#change
+AUDIO_FFT_THRESHOLD = 10#change
+AUDIO_TIME_THRESHOLD = 0.007#change
 
 length = 50
 offset = 25
@@ -199,7 +199,8 @@ while left_sensor_index + length < len(left_sensor.time) and right_sensor_index 
             right_bucket[j][(int)((k+5)/10)] = right_bucket[j][(int)((k+5)/10)] + (right_data_fft[j, k])
     is_sensor_freq_peak = False
     for j in range(3):
-        if left_bucket[i][1] > SENSOR_FFT_THRESHOLD or right_bucket[i][1] > SENSOR_FFT_THRESHOLD:#change 现在取的是5-15hz的能量值判断。
+        print(left_bucket[j][1], right_bucket[j][1])
+        if left_bucket[j][1] > SENSOR_FFT_THRESHOLD or right_bucket[j][1] > SENSOR_FFT_THRESHOLD:#change 现在取的是5-15hz的能量值判断。
             is_sensor_freq_peak = True
         break
     if is_sensor_freq_peak:
@@ -303,5 +304,5 @@ axs[5].plot(audio_cover_array)
 axs[6].plot(gesture_cover_array)
 plt.show()
 
-np.save('training/sound/hbj/PxP2_np', store_data_list)
+np.save('training/sound/hbj/IyPright_np', store_data_list)
 

@@ -96,8 +96,14 @@ log bucket：限制在40个feature以内，一只手20个，log均分到5000，0
 STFT归一化之后能够很好地区分IxB和PxB，IxB的特征在STFT中极为明显。
 尝试STFT：如何使用STFT的二维矩阵信息？将所有时间取max，然后取前十个freq。
 
+2019/3/25 log
+
+
 todo：
+列出需要测试的动作。
+RMS可以理解为归一化的值。
 mfcc的归一化
+STFT在max之外有没有其它方法屏蔽时域信息。
 上面feature的归一化
 还有LSTM
 如何解决双击的识别？
