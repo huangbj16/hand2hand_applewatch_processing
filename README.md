@@ -65,11 +65,13 @@ audio analysis 基本完成，发现了未对齐的问题，需要解决。
 记得以后采数据要先拍一下手！！！autoalign！！！
 
 2019/3/19 log
-昨天采集并处理完了数据，
-今天仍然使用了find peak的方法分类，发现效果很一般。
+昨天采集并处理完了数据，今天仍然使用了find peak的方法分类，发现效果很一般。
+
 查阅了一些论文，如
-    Design and Implementation of Frequency Domain Feature Extraction Module for Human Motion Recognition
-    AMP: a new time-frequency feature extraction method for intermittent time-series data
+Design and Implementation of Frequency Domain Feature Extraction Module for Human Motion Recognition
+
+AMP: a new time-frequency feature extraction method for intermittent time-series data
+
 得到了一些处理的灵感，尝试了STFT，发现有点意思，说不定能有效果。
 
 接下来尝试log bucket
@@ -81,23 +83,37 @@ log bucket：限制在40个feature以内，一只手20个，log均分到5000，0
 尝试 np.mean+std，不行，频域上出现了负数的能量。
 尝试用一个人的数据预测另一个人的，3分类0.56，不合理。
 
-
 2019/3/22 log
 看其它声音论文是否有使用频域上的特征？？
+
 今天读了十篇声音相关的论文，总结了哪些feature可以使用。
 
 2019/3/24 log
 尝试之前总结的feature
+
 模仿了Detecting论文，使用了maximum, minimum, and average values of pitch, flux, roll-off, centroid, ZCR, RMS, and SNR的特征，效果一般。max min mean = : 0.6944444444444444 0.3055555555555556 0.47055555555555556
 
 接下来尝试mfcc和stft。
+
 尝试了mfcc，手动查看了结果，区别极小，mfcc结果保存在pic中。
 
 STFT归一化之后能够很好地区分IxB和PxB，IxB的特征在STFT中极为明显。
+
 尝试STFT：如何使用STFT的二维矩阵信息？将所有时间取max，然后取前十个freq。
 
 2019/3/25 log
+列出需要测试的动作。
 
+共12个动作，四个一组为容易混淆的。
+
+完成了一个被试的数据采集。
+
+2019/3/26 log
+处理采集到的数据。
+
+发现了audio_analysis中的一个bug，已解决。
+
+处理完了三个人的数据。
 
 todo：
 列出需要测试的动作。
