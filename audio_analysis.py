@@ -11,21 +11,21 @@ is_display_on = False
 is_single_display_on = True
 
 #initialize
-left_sensor = Process('data/sound/jzs/log-20190325-PxP-WatchL.txt')
+left_sensor = Process('data/sound/ljh/log-20190329-PxP-WatchL.txt')
 left_sensor.read_data()
 left_sensor.preprocess_timing_gap()
 # left.show_single_plot()
-right_sensor = Process('data/sound/jzs/log-20190325-PxP-WatchR.txt')
+right_sensor = Process('data/sound/ljh/log-20190329-PxP-WatchR.txt')
 right_sensor.read_data()
 right_sensor.preprocess_timing_gap()
 
 TIMING_DIFF = left_sensor.time[0] - right_sensor.time[0]
 right_sensor.time = [time+TIMING_DIFF for time in right_sensor.time]
 
-left_audio = AudioProcess('data/sound/jzs/log-20190325-PxP-WatchL.wav')
+left_audio = AudioProcess('data/sound/ljh/log-20190329-PxP-WatchL.wav')
 left_audio.frequency_transform()
 left_audio.mfcc_transform()
-right_audio = AudioProcess('data/sound/jzs/log-20190325-PxP-WatchR.wav')
+right_audio = AudioProcess('data/sound/ljh/log-20190329-PxP-WatchR.wav')
 right_audio.frequency_transform()
 right_audio.mfcc_transform()
 
@@ -45,7 +45,7 @@ right_audio_start = 0
 is_autoalign = True#change
 #auto align
 if is_autoalign:
-    autoalign_threshold_sensor = 2#change
+    autoalign_threshold_sensor = 5#change
     autoalign_threshold_audio = 0.5#change
     for unit_index in range(len(left_sensor.time)):
         unit = left_sensor.data['acc'][unit_index]
@@ -88,7 +88,6 @@ else:
     right_sensor_start = 531 - 100
     left_audio_start = 202165 - 44100
     right_audio_start = 199708 - 44100
-
 
 print('autoalign result: ', left_sensor_start, right_sensor_start, left_audio_start, right_audio_start)
 print('start time: ', left_sensor.time[left_sensor_start], right_sensor.time[right_sensor_start])
@@ -135,10 +134,10 @@ right_audio_index = right_audio_start
 #detection
 print('detectiondetectiondetectiondetection')
 AUDIO_FREQ = 44100
-SENSOR_FFT_THRESHOLD = 9#change
-SENSOR_TIME_THRESHOLD = 1.5#change
+SENSOR_FFT_THRESHOLD = 30#change
+SENSOR_TIME_THRESHOLD = 3#change
 AUDIO_FFT_THRESHOLD = 10#change
-AUDIO_TIME_THRESHOLD = 0.2#change
+AUDIO_TIME_THRESHOLD = 0.1#change
 
 length = 50
 offset = 25
@@ -328,5 +327,5 @@ axs[5].plot(audio_cover_array)
 axs[6].plot(gesture_cover_array)
 plt.show()
 
-np.save('training/sound/jzs/PxP_np', store_data_list)
+np.save('training/sound/ljh/PxP_np', store_data_list)
 

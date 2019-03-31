@@ -40,34 +40,27 @@ type_array = []
 
 motion_type = []
 
-rootdir = 'training/sound/hbj'
-list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
-for i in range(0, len(list)):
-    motion_type.append(list[i])
-    path = os.path.join(rootdir,list[i])
-    print(path)
-    data = np.load(path)
-    print(data.shape)
-    type_array.append(data)
-print(len(type_array))
-type_num = len(type_array)
+suffixes = ['hbj/', 'lyq/', 'jzs/', 'ljh/']
 
-rootdir = 'training/sound/lyq'
-list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
-for i in range(0, len(list)):
-    path = os.path.join(rootdir,list[i])
-    print(path)
-    data = np.load(path)
-    print(data.shape)
-    if list[i] in motion_type:
-        mark = motion_type.index(list[i])
-        previous_data = type_array[mark]
-        type_array[mark] = np.concatenate((previous_data, data))
-    else:
-        type_array.append(data)
-        motion_type.append(list[i])
-print(len(type_array))
-print(motion_type)
+for suffix in suffixes:
+    rootdir = 'training/sound/'+suffix
+    list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
+    for i in range(0, len(list)):
+        if 'IyP' in list[i]:
+            continue
+        path = os.path.join(rootdir,list[i])
+        print(path)
+        data = np.load(path)
+        print(data.shape)
+        if list[i] in motion_type:
+            mark = motion_type.index(list[i])
+            previous_data = type_array[mark]
+            type_array[mark] = np.concatenate((previous_data, data))
+        else:
+            type_array.append(data)
+            motion_type.append(list[i])
+
+print(len(motion_type), motion_type)
 
 #####################feature process
 feature_array = []
@@ -191,7 +184,7 @@ flag_set = np.concatenate(type_flag)
 feature_set = np.concatenate(feature_array)
 print(type_set.shape, flag_set.shape, feature_set.shape)
 
-res_matrix = np.zeros((type_num, type_num), dtype=np.int)
+res_matrix = np.zeros((len(motion_type), len(motion_type)), dtype=np.int)
 
 for i in range(100):
     clf = SVC(kernel='rbf', gamma='auto')# ‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’
@@ -247,7 +240,7 @@ def plot_confusion_matrix(cm, classes,
     plt.tight_layout()
 
 
-class_names = np.arange(type_num)#change
+class_names = np.arange(len(motion_type))#change
 
 # Plot non-normalized confusion matrix
 plt.figure()

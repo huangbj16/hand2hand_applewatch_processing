@@ -43,34 +43,27 @@ type_array = []
 
 motion_type = []
 
-rootdir = 'training/sound/hbj'
-list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
-for i in range(0, len(list)):
-    motion_type.append(list[i])
-    path = os.path.join(rootdir,list[i])
-    print(path)
-    data = np.load(path)
-    print(data.shape)
-    type_array.append(data)
-print(len(type_array))
+suffixes = ['hbj/', 'lyq/', 'jzs/', 'ljh/']
 
+for suffix in suffixes:
+    rootdir = 'training/sound/'+suffix
+    list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
+    for i in range(0, len(list)):
+        if 'IyP' in list[i]:
+            continue
+        path = os.path.join(rootdir,list[i])
+        print(path)
+        data = np.load(path)
+        print(data.shape)
+        if list[i] in motion_type:
+            mark = motion_type.index(list[i])
+            previous_data = type_array[mark]
+            type_array[mark] = np.concatenate((previous_data, data))
+        else:
+            type_array.append(data)
+            motion_type.append(list[i])
 
-# rootdir = 'training/sound/lyq'
-# list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
-# for i in range(0, len(list)):
-#     path = os.path.join(rootdir,list[i])
-#     print(path)
-#     data = np.load(path)
-#     print(data.shape)
-#     if list[i] in motion_type:
-#         mark = motion_type.index(list[i])
-#         previous_data = type_array[mark]
-#         type_array[mark] = np.concatenate((previous_data, data))
-#     else:
-#         type_array.append(data)
-#         motion_type.append(list[i])
-print(len(type_array))
-print(motion_type)
+print(len(motion_type), motion_type)
 
 #####################display to see manually
 
@@ -98,8 +91,8 @@ feature_array = []
 for i in range(len(type_array)):
     primitive_data = type_array[i]
     data_length = primitive_data.shape[0]
-    bound = 10
-    feature_length = 20
+    bound = 25
+    feature_length = 50
     featured_data = np.zeros((data_length, feature_length))
     print('type:', motion_type[i])
     for j in range(data_length):
@@ -112,14 +105,24 @@ for i in range(len(type_array)):
 
         # from Detecting and Classifying Human Touches in a Social Robot Through Acoustic Sensing and Machine Learning
         # maximum, minimum, and average values of pitch, flux, roll-off, centroid, ZCR, RMS, and SNR.
+        # basic features
+        # root_mean_square = [np.sqrt(((audio_left).astype('double') ** 2).mean()), np.sqrt(((audio_right).astype('double') ** 2).mean())]
+        # audio_left = audio_left / root_mean_square[0]
+        # audio_right = audio_right / root_mean_square[1]
         # audio_max = [np.max(audio_left), np.max(audio_right)]
         # audio_min = [np.min(audio_left), np.min(audio_right)]
         # audio_mean = [np.mean(audio_left), np.mean(audio_right)]
         # audio_std = [np.std(audio_left), np.std(audio_right)]
+        # featured_data[j] = np.concatenate((audio_max, audio_min, audio_mean, audio_std))
+
+
+        # high-dimension features
         # root_mean_square = [np.sqrt(((audio_left).astype('double') ** 2).mean()), np.sqrt(((audio_right).astype('double') ** 2).mean())]
-        # # zero_crossing_rate = [0, 0]
-        # # for k in range(len(audio_left)-1):
-        # #     if audio_left
+        # # lacking zero crossing rate, can't implemented.
+        # audio_left = audio_left / root_mean_square[0]
+        # audio_right = audio_right / root_mean_square[1]
+        # freq_audio_left = np.array(abs(fft(audio_left)))
+        # freq_audio_right = np.array(abs(fft(audio_right)))
         # freq_audio_left = freq_audio_left[:11025]
         # freq_audio_right = freq_audio_right[:11025]
         # freq_energy = [np.sum(freq_audio_left), np.sum(freq_audio_right)]
@@ -134,32 +137,34 @@ for i in range(len(type_array)):
         #         roll_off[1] = k
         # freq_index = np.arange(11025)
         # centroid = [np.sum(freq_audio_left*freq_index) / np.sum(freq_audio_left), np.sum(freq_audio_right*freq_index) / np.sum(freq_audio_right)]
-        # featured_data[j] = np.concatenate((audio_max, audio_min, audio_mean, audio_std, root_mean_square, roll_off, centroid))
+        # featured_data[j] = np.concatenate((root_mean_square))
 
         # freq_audio_left = freq_audio_left[:5000]
         # freq_audio_right = freq_audio_right[:5000]
 
+
         ##############feature: stft
         ##############display
         fs = 44100
-        f, t, Zxx = signal.stft(audio_left, fs, nperseg=100)
-        Zxx = np.abs(Zxx)
-        Zxx = np.amax(Zxx, axis=1)
-        Zxx = Zxx / np.linalg.norm(Zxx)
-        featured_data[j, 0:bound] = Zxx[:10]
-        f, t, Zxx = signal.stft(audio_right, fs, nperseg=100)
-        Zxx = np.abs(Zxx)
-        Zxx = np.amax(Zxx, axis=1)
-        Zxx = Zxx / np.linalg.norm(Zxx)
-        featured_data[j, bound:] = Zxx[:10]
+        f, t, Zxx = signal.stft(audio_left, fs, nperseg=2100)
+        Zxx = np.abs(Zxx)     
         
         # print(f.shape, t.shape, Zxx.shape)
-        # print(f[:5], t[:5], Zxx[0][0])
-        # plt.pcolormesh(t, f[:5], np.abs(Zxx)[:5], vmin=np.min(audio_left), vmax=np.max(audio_left))
+        # print(f[:20], t[:20], Zxx[0][0])
+        # plt.pcolormesh(t, f[:20], np.abs(Zxx)[:20], vmin=np.min(audio_left), vmax=np.max(audio_left))
         # plt.title('STFT Magnitude')
         # plt.ylabel('Frequency [Hz]')
         # plt.xlabel('Time [sec]')
         # plt.show()
+
+        Zxx = np.sum(Zxx, axis=1)
+        Zxx = Zxx / np.linalg.norm(Zxx)
+        featured_data[j, 0:bound] = Zxx[:25]
+        f, t, Zxx = signal.stft(audio_right, fs, nperseg=2100)
+        Zxx = np.abs(Zxx)
+        Zxx = np.sum(Zxx, axis=1)
+        Zxx = Zxx / np.linalg.norm(Zxx)
+        featured_data[j, bound:] = Zxx[:25]
         
 
         ##############feature: peaks in audio freq
@@ -186,8 +191,8 @@ for i in range(len(type_array)):
         # featured_data[j, 10:20] = peaks_right[:10]
 
 
-        ##############feature: bucket
-        ######normalize
+        ##############feature: bucket max min mean = : 0.9057750759878419 0.8206686930091185 0.8540425531914891
+        ######normalize 
         # freq_audio_left = freq_audio_left / np.linalg.norm(freq_audio_left)
         # freq_audio_right = freq_audio_right / np.linalg.norm(freq_audio_right)
         # bucket_index = [0, 100, 200, 400, 800, 1600, 2400, 3200, 4000, 6400, 11025]
@@ -205,18 +210,20 @@ for i in range(len(type_array)):
         # featured_data[j, bound:2*bound] = freq_energy_audio_right[0:bound]
         
 
-        ##############feature: mfcc
+        ##############feature: mfcc max min mean = : 0.9513677811550152 0.8844984802431611 0.9130699088145896
         # sampling_freq = 44100
         # fft_size = 22050
-        # mfcc_left = mfcc(audio_left, samplerate=sampling_freq, winlen=0.25, winstep=0.125, nfft=fft_size)
-        # mfcc_right = mfcc(audio_right, samplerate=sampling_freq, winlen=0.25, winstep=0.125, nfft=fft_size)
+        # audio_left = audio_left / np.linalg.norm(audio_left)
+        # audio_right = audio_right / np.linalg.norm(audio_right)
+        # mfcc_left = mfcc(audio_left, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
+        # mfcc_right = mfcc(audio_right, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
         # # print(mfcc_left.shape, mfcc_right.shape)
         # # print(np.mean(mfcc_left, axis=0).shape)
         # # exit(0)
-        # # featured_data[j, 0:bound] = mfcc_left.reshape(-1)
-        # # featured_data[j, bound:2*bound] = mfcc_right.reshape(-1)
-        # featured_data[j, 0:bound] = np.amax(mfcc_left, axis=0)
-        # featured_data[j, bound:2*bound] = np.amax(mfcc_right, axis=0)
+        # featured_data[j, 0:bound] = np.abs(mfcc_left).reshape(-1)
+        # featured_data[j, bound:2*bound] = np.abs(mfcc_right).reshape(-1)
+        # # featured_data[j, 0:bound] = np.amax(mfcc_left, axis=0)
+        # # featured_data[j, bound:2*bound] = np.amax(mfcc_right, axis=0)
 
         ###############feature: brute force audio
         # featured_data[j] = segment[900:]
@@ -290,7 +297,7 @@ clf = SVC(kernel='rbf', gamma='auto')# ‘linear’, ‘poly’, ‘rbf’, ‘s
 
 print('current time: ', time.time())
 seed = int(time.time()*10000000) % 19980608
-cv =ShuffleSplit(100, test_size=0.2, train_size=0.8, random_state=seed)
+cv =ShuffleSplit(10, test_size=0.2, train_size=0.8, random_state=seed)
 scores = cross_validate(clf, feature_set, flag_set, cv=cv, return_train_score=True, return_estimator=True)
 print(scores['test_score'])
 print('max min mean = :', max(scores['test_score']), min(scores['test_score']), np.mean(scores['test_score']))

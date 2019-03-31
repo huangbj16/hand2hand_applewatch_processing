@@ -38,31 +38,37 @@ type_array = []
 
 motion_type = []
 
-rootdir = 'training/IyPset_motion/'
-list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
-for i in range(0, len(list)):
-    motion_type.append(list[i])
-    path = os.path.join(rootdir,list[i])
-    print(path)
-    data = np.load(path)
-    print(data.shape)
-    type_array.append(data)
-print(len(type_array))
+# rootdir = 'training/IyPset_motion/'
+# list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
+# for i in range(0, len(list)):
+#     motion_type.append(list[i])
+#     path = os.path.join(rootdir,list[i])
+#     print(path)
+#     data = np.load(path)
+#     print(data.shape)
+#     type_array.append(data)
+# print(len(type_array))
 
-rootdir = 'training/IyPset_motion_lu/'
-list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
-for i in range(0, len(list)):
-    path = os.path.join(rootdir,list[i])
-    print(path)
-    data = np.load(path)
-    print(data.shape)
-    if list[i] in motion_type:
-        mark = motion_type.index(list[i])
-        previous_data = type_array[mark]
-        type_array[mark] = np.concatenate((previous_data, data))
-    else:
-        type_array.append(data)
-print(len(type_array))
+suffixes = ['hbj/', 'lyq/', 'jzs/', 'ljh/']
+
+for suffix in suffixes:
+    rootdir = 'training/sound/'+suffix
+    list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
+    for i in range(0, len(list)):
+        path = os.path.join(rootdir,list[i])
+        print(path)
+        data = np.load(path)
+        print(data.shape)
+        if list[i] in motion_type:
+            mark = motion_type.index(list[i])
+            previous_data = type_array[mark]
+            type_array[mark] = np.concatenate((previous_data, data))
+        else:
+            type_array.append(data)
+            motion_type.append(list[i])
+
+print(len(motion_type), motion_type)
+
 
 feature_array = []
 
@@ -73,7 +79,7 @@ for i in range(len(type_array)):
     # + (left, right) * (acc) * (x, y, z) * (frequency[5:25])
     featured_data = np.zeros((data_length, feature_length))
     for j in range(data_length):
-        data_unit = primitive_data[j].reshape(50, 18)
+        data_unit = primitive_data[j][0:900].reshape(50, 18)
         for k in range(18):
             # if not isRot(k):
             data_unit_coor = data_unit[:, k]
@@ -92,14 +98,12 @@ for i in range(len(type_array)):
 
     feature_array.append(featured_data)
 
-
 print(len(feature_array))
-
 
 type_flag = []
 for i in range(len(type_array)):
     flag = np.ones((type_array[i].shape[0])) * i
-    print(flag)
+    # print(flag)
     type_flag.append(flag)
 
 #concatenate
@@ -120,7 +124,7 @@ print(feature_set)
 clf = SVC(kernel='rbf', gamma='auto')# ‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’
 print('current time: ', time.time())
 seed = int(time.time()*10000000) % 19980608
-cv =ShuffleSplit(10, test_size=0.2, train_size=0.8, random_state=seed)
+cv =ShuffleSplit(100, test_size=0.2, train_size=0.8, random_state=seed)
 scores = cross_validate(clf, feature_set, flag_set, cv=cv, return_train_score=True, return_estimator=True)
 print(scores['test_score'])
 print('max min mean = :', max(scores['test_score']), min(scores['test_score']), np.mean(scores['test_score']))
