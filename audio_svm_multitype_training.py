@@ -11,7 +11,9 @@ from scipy.fftpack import fft,ifft
 from scipy.misc import electrocardiogram
 from scipy.signal import find_peaks
 from scipy import signal
-from python_speech_features  import mfcc
+import sys
+sys.path.append('/')
+from python_audio_feature import mfcc
 
 
 def isRot(k):
@@ -91,8 +93,8 @@ feature_array = []
 for i in range(len(type_array)):
     primitive_data = type_array[i]
     data_length = primitive_data.shape[0]
-    bound = 25
-    feature_length = 50
+    bound = 26
+    feature_length = 52
     featured_data = np.zeros((data_length, feature_length))
     print('type:', motion_type[i])
     for j in range(data_length):
@@ -145,26 +147,26 @@ for i in range(len(type_array)):
 
         ##############feature: stft
         ##############display
-        fs = 44100
-        f, t, Zxx = signal.stft(audio_left, fs, nperseg=2100)
-        Zxx = np.abs(Zxx)     
+        # fs = 44100
+        # f, t, Zxx = signal.stft(audio_left, fs, nperseg=2100)
+        # Zxx = np.abs(Zxx)     
         
-        # print(f.shape, t.shape, Zxx.shape)
-        # print(f[:20], t[:20], Zxx[0][0])
-        # plt.pcolormesh(t, f[:20], np.abs(Zxx)[:20], vmin=np.min(audio_left), vmax=np.max(audio_left))
-        # plt.title('STFT Magnitude')
-        # plt.ylabel('Frequency [Hz]')
-        # plt.xlabel('Time [sec]')
-        # plt.show()
+        # # print(f.shape, t.shape, Zxx.shape)
+        # # print(f[:20], t[:20], Zxx[0][0])
+        # # plt.pcolormesh(t, f[:20], np.abs(Zxx)[:20], vmin=np.min(audio_left), vmax=np.max(audio_left))
+        # # plt.title('STFT Magnitude')
+        # # plt.ylabel('Frequency [Hz]')
+        # # plt.xlabel('Time [sec]')
+        # # plt.show()
 
-        Zxx = np.sum(Zxx, axis=1)
-        Zxx = Zxx / np.linalg.norm(Zxx)
-        featured_data[j, 0:bound] = Zxx[:25]
-        f, t, Zxx = signal.stft(audio_right, fs, nperseg=2100)
-        Zxx = np.abs(Zxx)
-        Zxx = np.sum(Zxx, axis=1)
-        Zxx = Zxx / np.linalg.norm(Zxx)
-        featured_data[j, bound:] = Zxx[:25]
+        # Zxx = np.sum(Zxx, axis=1)
+        # Zxx = Zxx / np.linalg.norm(Zxx)
+        # featured_data[j, 0:bound] = Zxx[:25]
+        # f, t, Zxx = signal.stft(audio_right, fs, nperseg=2100)
+        # Zxx = np.abs(Zxx)
+        # Zxx = np.sum(Zxx, axis=1)
+        # Zxx = Zxx / np.linalg.norm(Zxx)
+        # featured_data[j, bound:] = Zxx[:25]
         
 
         ##############feature: peaks in audio freq
@@ -211,19 +213,19 @@ for i in range(len(type_array)):
         
 
         ##############feature: mfcc max min mean = : 0.9513677811550152 0.8844984802431611 0.9130699088145896
-        # sampling_freq = 44100
-        # fft_size = 22050
-        # audio_left = audio_left / np.linalg.norm(audio_left)
-        # audio_right = audio_right / np.linalg.norm(audio_right)
-        # mfcc_left = mfcc(audio_left, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
-        # mfcc_right = mfcc(audio_right, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
-        # # print(mfcc_left.shape, mfcc_right.shape)
-        # # print(np.mean(mfcc_left, axis=0).shape)
-        # # exit(0)
-        # featured_data[j, 0:bound] = np.abs(mfcc_left).reshape(-1)
-        # featured_data[j, bound:2*bound] = np.abs(mfcc_right).reshape(-1)
-        # # featured_data[j, 0:bound] = np.amax(mfcc_left, axis=0)
-        # # featured_data[j, bound:2*bound] = np.amax(mfcc_right, axis=0)
+        sampling_freq = 44100
+        fft_size = 22050
+        audio_left = audio_left / np.linalg.norm(audio_left)
+        audio_right = audio_right / np.linalg.norm(audio_right)
+        mfcc_left = mfcc(audio_left, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
+        mfcc_right = mfcc(audio_right, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
+        # print(mfcc_left.shape, mfcc_right.shape)
+        # print(np.mean(mfcc_left, axis=0).shape)
+        # exit(0)
+        featured_data[j, 0:bound] = np.abs(mfcc_left).reshape(-1)
+        featured_data[j, bound:2*bound] = np.abs(mfcc_right).reshape(-1)
+        # featured_data[j, 0:bound] = np.amax(mfcc_left, axis=0)
+        # featured_data[j, bound:2*bound] = np.amax(mfcc_right, axis=0)
 
         ###############feature: brute force audio
         # featured_data[j] = segment[900:]

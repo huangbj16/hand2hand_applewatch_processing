@@ -135,6 +135,16 @@ max min mean = : 0.9513677811550152 0.8844984802431611 0.9130699088145896
 RMS可以理解为归一化的值。
 基本特征在使用RMS归一化之后达到50%正确率，而rolloff-95，centroid无法发挥作用，信息过少。
 
+2019/4/1 log
+
+写论文：听起来不一样，特征不一样
+
+找人做实验
+
+将修改的python package集成到了项目中。
+**Special thanks to python package python-speech-feature**
+
+
 todo：
 忘了采集噪声。
 STFT在max之外有没有其它方法屏蔽时域信息。
