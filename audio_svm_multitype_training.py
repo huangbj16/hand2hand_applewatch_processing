@@ -94,7 +94,7 @@ for i in range(len(type_array)):
     primitive_data = type_array[i]
     data_length = primitive_data.shape[0]
     bound = 26
-    feature_length = 52
+    feature_length = 52+72
     featured_data = np.zeros((data_length, feature_length))
     print('type:', motion_type[i])
     for j in range(data_length):
@@ -104,6 +104,15 @@ for i in range(len(type_array)):
         audio_right = segment[900+22050:900+44100]
         freq_audio_left = np.array(abs(fft(audio_left)))
         freq_audio_right = np.array(abs(fft(audio_right)))
+
+        feature_offset = 52
+        for k in range(18):
+            # if not isRot(k):
+            data_unit_coor = data_unit[:, k]
+            featured_data[j, feature_offset + 4*k] = (int(np.min(data_unit_coor) * 1000)) / 1000
+            featured_data[j, feature_offset + 4*k+1] = (int(np.max(data_unit_coor) * 1000)) / 1000
+            featured_data[j, feature_offset + 4*k+2] = (int(np.mean(data_unit_coor) * 1000)) / 1000
+            featured_data[j, feature_offset + 4*k+3] = (int(np.std(data_unit_coor) * 1000)) / 1000
 
         # from Detecting and Classifying Human Touches in a Social Robot Through Acoustic Sensing and Machine Learning
         # maximum, minimum, and average values of pitch, flux, roll-off, centroid, ZCR, RMS, and SNR.
@@ -299,7 +308,7 @@ clf = SVC(kernel='rbf', gamma='auto')# ‘linear’, ‘poly’, ‘rbf’, ‘s
 
 print('current time: ', time.time())
 seed = int(time.time()*10000000) % 19980608
-cv =ShuffleSplit(10, test_size=0.2, train_size=0.8, random_state=seed)
+cv =ShuffleSplit(100, test_size=0.2, train_size=0.8, random_state=seed)
 scores = cross_validate(clf, feature_set, flag_set, cv=cv, return_train_score=True, return_estimator=True)
 print(scores['test_score'])
 print('max min mean = :', max(scores['test_score']), min(scores['test_score']), np.mean(scores['test_score']))

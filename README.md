@@ -144,6 +144,10 @@ RMS可以理解为归一化的值。
 将修改的python package集成到了项目中。
 **Special thanks to python package python-speech-feature**
 
+集成两类feature，然后尝试3训练1预测。
+双特征：max min mean = : 1.0 0.9665653495440729 0.9856838905775075
+
+3预测1的话，三个0.7和一个0.9
 
 todo：
 忘了采集噪声。

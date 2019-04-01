@@ -55,6 +55,8 @@ for suffix in suffixes:
     rootdir = 'training/sound/'+suffix
     list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
     for i in range(0, len(list)):
+        if 'IyP' in list[i]:
+            continue
         path = os.path.join(rootdir,list[i])
         print(path)
         data = np.load(path)
