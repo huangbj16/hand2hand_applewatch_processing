@@ -137,10 +137,6 @@ RMS可以理解为归一化的值。
 
 2019/4/1 log
 
-写论文：听起来不一样，特征不一样
-
-找人做实验
-
 将修改的python package集成到了项目中。
 **Special thanks to python package python-speech-feature**
 
@@ -149,11 +145,16 @@ RMS可以理解为归一化的值。
 
 3预测1的话，三个0.7和一个0.9
 
+STFT在max之外有没有其它方法屏蔽时域信息？YYK学长说可以用DTW。决定只在overview里用DTFT显示区别，在svm feature里不使用。
+
 todo：
+滑动识别和分类效果。
+写论文：听起来不一样，特征不一样
+找人做实验
 忘了采集噪声。
-STFT在max之外有没有其它方法屏蔽时域信息。
 还有LSTM
 如何解决双击的识别？
+代码重构
 
 By Bingjian Huang
 
