@@ -51,7 +51,7 @@ for suffix in suffixes:
     rootdir = 'training/sound/'+suffix
     list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
     for i in range(0, len(list)):
-        if 'IyP' in list[i]:
+        if not 'IyP' in list[i]:
             continue
         path = os.path.join(rootdir,list[i])
         print(path)
@@ -94,7 +94,7 @@ for i in range(len(type_array)):
     primitive_data = type_array[i]
     data_length = primitive_data.shape[0]
     bound = 26
-    feature_length = 52+72
+    feature_length = 72
     featured_data = np.zeros((data_length, feature_length))
     print('type:', motion_type[i])
     for j in range(data_length):
@@ -105,7 +105,7 @@ for i in range(len(type_array)):
         freq_audio_left = np.array(abs(fft(audio_left)))
         freq_audio_right = np.array(abs(fft(audio_right)))
 
-        feature_offset = 52
+        feature_offset = 0
         for k in range(18):
             # if not isRot(k):
             data_unit_coor = data_unit[:, k]
@@ -222,19 +222,19 @@ for i in range(len(type_array)):
         
 
         ##############feature: mfcc max min mean = : 0.9513677811550152 0.8844984802431611 0.9130699088145896
-        sampling_freq = 44100
-        fft_size = 22050
-        audio_left = audio_left / np.linalg.norm(audio_left)
-        audio_right = audio_right / np.linalg.norm(audio_right)
-        mfcc_left = mfcc(audio_left, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
-        mfcc_right = mfcc(audio_right, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
-        # print(mfcc_left.shape, mfcc_right.shape)
-        # print(np.mean(mfcc_left, axis=0).shape)
-        # exit(0)
-        featured_data[j, 0:bound] = np.abs(mfcc_left).reshape(-1)
-        featured_data[j, bound:2*bound] = np.abs(mfcc_right).reshape(-1)
-        # featured_data[j, 0:bound] = np.amax(mfcc_left, axis=0)
-        # featured_data[j, bound:2*bound] = np.amax(mfcc_right, axis=0)
+        # sampling_freq = 44100
+        # fft_size = 22050
+        # audio_left = audio_left / np.linalg.norm(audio_left)
+        # audio_right = audio_right / np.linalg.norm(audio_right)
+        # mfcc_left = mfcc(audio_left, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
+        # mfcc_right = mfcc(audio_right, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
+        # # print(mfcc_left.shape, mfcc_right.shape)
+        # # print(np.mean(mfcc_left, axis=0).shape)
+        # # exit(0)
+        # featured_data[j, 0:bound] = np.abs(mfcc_left).reshape(-1)
+        # featured_data[j, bound:2*bound] = np.abs(mfcc_right).reshape(-1)
+        # # featured_data[j, 0:bound] = np.amax(mfcc_left, axis=0)
+        # # featured_data[j, bound:2*bound] = np.amax(mfcc_right, axis=0)
 
         ###############feature: brute force audio
         # featured_data[j] = segment[900:]

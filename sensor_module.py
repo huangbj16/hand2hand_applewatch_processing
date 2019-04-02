@@ -16,7 +16,7 @@ class Process(object):
         self.filename = filename
         # self.array_time = []
         self.time = []
-        self.data = {'acc':[], 'att':[], 'rot':[]}
+        self.data = {'acc':[], 'rot':[], 'qua':[]}
 
     def read_data(self):
         f = open(self.filename, 'r')
@@ -28,10 +28,10 @@ class Process(object):
             self.time.append(float(lines[line*4].split()[1]))
             acc = [float(acc_data) for acc_data in lines[line*4+1].split()[1:]]
             self.data['acc'].append(acc)
-            att = [float(att_data) for att_data in lines[line*4+2].split()[1:]]
-            self.data['att'].append(att)
-            rot = [float(rot_data) for rot_data in lines[line*4+3].split()[1:]]
+            rot = [float(rot_data) for rot_data in lines[line*4+2].split()[1:]]
             self.data['rot'].append(rot)
+            qua = [float(qua_data) for qua_data in lines[line*4+3].split()[1:]]
+            self.data['qua'].append(qua)
         # print(self.time)
         # print(self.data)
 
@@ -47,16 +47,17 @@ class Process(object):
         print('min  = ', np.min(timing_gap))
 
     def show_single_plot(self):
-        fig, axs = plt.subplots(9, 1)
+        fig, axs = plt.subplots(10, 1)
         axs[0].plot(self.time, [data[0] for data in self.data['acc']])
         axs[1].plot(self.time, [data[1] for data in self.data['acc']])
         axs[2].plot(self.time, [data[2] for data in self.data['acc']])
-        axs[3].plot(self.time, [data[0] for data in self.data['att']])
-        axs[4].plot(self.time, [data[1] for data in self.data['att']])
-        axs[5].plot(self.time, [data[2] for data in self.data['att']])
-        axs[6].plot(self.time, [data[0] for data in self.data['rot']])
-        axs[7].plot(self.time, [data[1] for data in self.data['rot']])
-        axs[8].plot(self.time, [data[2] for data in self.data['rot']])
+        axs[3].plot(self.time, [data[0] for data in self.data['rot']])
+        axs[4].plot(self.time, [data[1] for data in self.data['rot']])
+        axs[5].plot(self.time, [data[2] for data in self.data['rot']])
+        axs[6].plot(self.time, [data[0] for data in self.data['qua']])
+        axs[7].plot(self.time, [data[1] for data in self.data['qua']])
+        axs[8].plot(self.time, [data[2] for data in self.data['qua']])
+        axs[9].plot(self.time, [data[3] for data in self.data['qua']])
         plt.show()
 
     def frequency_transform(self):
