@@ -7,8 +7,8 @@ from audio_module import AudioProcess
 import random
 from lyq_quaternion_qua import rotate2
 
-is_display_on = True
-is_single_display_on = False
+is_display_on = False
+is_single_display_on = True
 
 #initialize
 left_sensor = Process('data/sound/ljh/log-20190329-PxB-WatchL.txt')
@@ -161,8 +161,8 @@ right_audio_index = right_audio_start
 #detection
 print('detectiondetectiondetectiondetection')
 AUDIO_FREQ = 44100
-SENSOR_FFT_THRESHOLD = 30#change
-SENSOR_TIME_THRESHOLD = 3#change
+SENSOR_FFT_THRESHOLD = 10#change
+SENSOR_TIME_THRESHOLD = 1#change
 AUDIO_FFT_THRESHOLD = 10#change
 AUDIO_TIME_THRESHOLD = 0.1#change
 
@@ -294,7 +294,7 @@ while left_sensor_index + length < len(left_sensor.time) and right_sensor_index 
         if abs(peak_index) < 13:#in middle, otherwise wait for next segment
             #left_sensor_segment, right_sensor_segment, 
             gesture_count = gesture_count + 1
-            store_data = np.array(store_data).reshape(-1)
+            store_data = (store_data.T).reshape(-1)
             store_data = np.concatenate((store_data, left_audio_segment, right_audio_segment))
             # print(store_data.shape)
             # left_audio_freq = np.array(abs(fft(left_audio_segment)))
