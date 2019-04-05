@@ -95,7 +95,7 @@ for i in range(len(type_array)):
     primitive_data = type_array[i]
     data_length = primitive_data.shape[0]
     bound = 26
-    feature_length = 80
+    feature_length = 40+52
     featured_data = np.zeros((data_length, feature_length))
     print('type:', motion_type[i])
     for j in range(data_length):

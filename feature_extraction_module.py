@@ -199,7 +199,7 @@ def feature_extraction_old(segment):
 
 def feature_extraction_new(segment):
     bound = 26
-    feature_length = 80
+    feature_length = 80+52
     featured_unit = np.zeros((feature_length))
 
     sensor_length = 1000
@@ -207,10 +207,10 @@ def feature_extraction_new(segment):
     data_unit = segment[0 : sensor_length].reshape(50, 20)
     audio_left = segment[sensor_length : sensor_length+audio_length]
     audio_right = segment[sensor_length+audio_length : sensor_length+2*audio_length]
-    freq_audio_left = np.array(abs(fft(audio_left)))
-    freq_audio_right = np.array(abs(fft(audio_right)))
+    # freq_audio_left = np.array(abs(fft(audio_left)))
+    # freq_audio_right = np.array(abs(fft(audio_right)))
 
-    feature_offset = 0
+    feature_offset = 52
     for k in range(20):
         # if not isRot(k):
         data_unit_coor = data_unit[:, k]
@@ -220,18 +220,18 @@ def feature_extraction_new(segment):
         featured_unit[feature_offset + 4*k+3] = (int(np.std(data_unit_coor) * 1000)) / 1000
 
     ##############feature: mfcc max min mean = : 0.9513677811550152 0.8844984802431611 0.9130699088145896
-    # sampling_freq = 44100
-    # fft_size = 22050
-    # audio_left = audio_left / np.linalg.norm(audio_left)
-    # audio_right = audio_right / np.linalg.norm(audio_right)
-    # mfcc_left = mfcc(audio_left, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
-    # mfcc_right = mfcc(audio_right, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
-    # # print(mfcc_left.shape, mfcc_right.shape)
-    # # print(np.mean(mfcc_left, axis=0).shape)
-    # # exit(0)
-    # featured_unit[0:bound] = np.abs(mfcc_left).reshape(-1)
-    # featured_unit[bound:2*bound] = np.abs(mfcc_right).reshape(-1)
-    # # featured_unit[0:bound] = np.amax(mfcc_left, axis=0)
-    # # featured_unit[bound:2*bound] = np.amax(mfcc_right, axis=0)
+    sampling_freq = 44100
+    fft_size = 22050
+    audio_left = audio_left / np.linalg.norm(audio_left)
+    audio_right = audio_right / np.linalg.norm(audio_right)
+    mfcc_left = mfcc(audio_left, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
+    mfcc_right = mfcc(audio_right, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
+    # print(mfcc_left.shape, mfcc_right.shape)
+    # print(np.mean(mfcc_left, axis=0).shape)
+    # exit(0)
+    featured_unit[0:bound] = np.abs(mfcc_left).reshape(-1)
+    featured_unit[bound:2*bound] = np.abs(mfcc_right).reshape(-1)
+    # featured_unit[0:bound] = np.amax(mfcc_left, axis=0)
+    # featured_unit[bound:2*bound] = np.amax(mfcc_right, axis=0)
 
     return featured_unit

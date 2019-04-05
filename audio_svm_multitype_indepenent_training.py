@@ -42,7 +42,9 @@ def isAtt(k):
 
 #################data upload
 
-suffixes = ['hbj/', 'lyq/' ,'ljh/']
+suffixes = ['hbj/', 'lyq/' ,'ljh/', 'jzs']
+
+accuracy_score_set = []
 
 for predict_suffix in suffixes:
 
@@ -55,7 +57,7 @@ for predict_suffix in suffixes:
         rootdir = 'training/sound_new/'+suffix
         list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
         for i in range(0, len(list)):
-            if not 'IyP' in list[i]:
+            if 'IyP' in list[i]:
                 continue
             path = os.path.join(rootdir,list[i])
             print(path)
@@ -76,7 +78,7 @@ for predict_suffix in suffixes:
     rootdir = 'training/sound_new/'+predict_suffix
     list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
     for i in range(0, len(list)):
-        if not 'IyP' in list[i]:
+        if 'IyP' in list[i]:
             continue
         path = os.path.join(rootdir,list[i])
         print(path)
@@ -117,7 +119,7 @@ for predict_suffix in suffixes:
         primitive_data = type_array[i]
         data_length = primitive_data.shape[0]
         bound = 26
-        feature_length = 80
+        feature_length = 40+52
         featured_data = np.zeros((data_length, feature_length))
         print('type:', motion_type[i])
         for j in range(data_length):
@@ -138,7 +140,7 @@ for predict_suffix in suffixes:
         primitive_data = predict_type_array[i]
         data_length = primitive_data.shape[0]
         bound = 26
-        feature_length = 80
+        feature_length = 40+52
         featured_data = np.zeros((data_length, feature_length))
         print('type:', motion_type[i])
         for j in range(data_length):
@@ -194,4 +196,7 @@ for predict_suffix in suffixes:
     ################use p1 data to predict p2 data
     y_pred = clf.fit(feature_set, flag_set).predict(predict_feature_set)
     print(accuracy_score(predict_flag_set, y_pred))
+    accuracy_score_set.append(accuracy_score(predict_flag_set, y_pred))
+
+print(accuracy_score_set)
 
