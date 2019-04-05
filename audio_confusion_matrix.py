@@ -9,7 +9,7 @@ import os
 import time
 from scipy.fftpack import fft,ifft
 import itertools
-from python_speech_features  import mfcc
+from feature_extraction_module import feature_extraction_new, feature_extraction_old
 
 def isRot(k):
     if k >= 6 and k < 9:
@@ -36,14 +36,16 @@ def isAtt(k):
         return False
 
 #################data upload
-type_array = []
 
+suffixes = ['hbj/', 'lyq/' ,'ljh/', 'jzs']
+
+accuracy_score_set = []
+
+type_array = []
 motion_type = []
 
-suffixes = ['hbj/', 'lyq/', 'jzs/', 'ljh/']
-
 for suffix in suffixes:
-    rootdir = 'training/sound/'+suffix
+    rootdir = 'training/sound_new/'+suffix
     list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
     for i in range(0, len(list)):
         if 'IyP' in list[i]:
@@ -54,150 +56,87 @@ for suffix in suffixes:
         print(data.shape)
         if list[i] in motion_type:
             mark = motion_type.index(list[i])
-            previous_data = type_array[mark]
-            type_array[mark] = np.concatenate((previous_data, data))
+            type_array[mark].append(data)
         else:
-            type_array.append(data)
+            type_array.append([data])
             motion_type.append(list[i])
 
 print(len(motion_type), motion_type)
+
+'''
+type_array format = [[t1d1, t1d2, t1d3...], [t2d1, t2d2, t2d3...], [t3d1...]]
+'''
 
 #####################feature process
 feature_array = []
 
 for i in range(len(type_array)):
-    primitive_data = type_array[i]
-    data_length = primitive_data.shape[0]
-    bound = 20
-    feature_length = 20
-    featured_data = np.zeros((data_length, feature_length))
-    print('type:', motion_type[i])
-    for j in range(data_length):
-        segment = primitive_data[j]
-        data_unit = segment[0:900].reshape(50, 18)
-        audio_left = segment[900:900+22050]
-        audio_right = segment[900+22050:900+44100]
-        freq_audio_left = np.array(abs(fft(audio_left)))
-        freq_audio_right = np.array(abs(fft(audio_right)))
+    feature_array.append([])
+    for j in range(len(type_array[i])):
+        primitive_data = type_array[i][j]
+        data_length = primitive_data.shape[0]
+        bound = 26
+        feature_length = 80+52
+        featured_data = np.zeros((data_length, feature_length))
+        print('type:', motion_type[i])
+        for j in range(data_length):
+            segment = primitive_data[j]
+            featured_data[j] = feature_extraction_new(segment)
 
-        
-        # freq_audio_left = freq_audio_left[:5000]
-        # freq_audio_right = freq_audio_right[:5000]
+        print(featured_data.shape)
 
-        ##############feature: stft
-        ##############display
-        # if i != 6:
-        #     break
-        # fs = 44100
-        # f, t, Zxx = signal.stft(audio_left, fs, nperseg=100)
-        # plt.pcolormesh(t, f[:10], np.abs(Zxx)[:10], vmin=np.min(audio_left), vmax=np.max(audio_left))
-        # plt.title('STFT Magnitude')
-        # plt.ylabel('Frequency [Hz]')
-        # plt.xlabel('Time [sec]')
-        # plt.show()
-        # continue
+        feature_array[i].append(featured_data)
 
-        ##############feature: peaks in audio freq
-        # peaks_left, _ = find_peaks(freq_audio_left, distance=100, height=1)
-        # peaks_right, _ = find_peaks(freq_audio_right, distance=100, height=1)        
-        ##############display
-        # if i != 1:
-        #     break
-        # print(peaks_left, peaks_right)
-        # fig, axs = plt.subplots(2, 1)        
-        # axs[0].plot(freq_audio_left)
-        # axs[0].plot(peaks_left, freq_audio_left[peaks_left], "x")
-        # axs[1].plot(freq_audio_right)
-        # axs[1].plot(peaks_right, freq_audio_right[peaks_right], "x")
-        # plt.show()
-        # continue
-        ##############complement and curtail to 10
-        # comple_array = np.ones((10), dtype=np.int)*(-100)
-        # if peaks_left.shape[0] < 10:
-        #     peaks_left = np.append(peaks_left, comple_array)
-        # if peaks_right.shape[0] < 10:
-        #     peaks_right = np.append(peaks_right, comple_array)
-        # featured_data[j, :10] = peaks_left[:10]
-        # featured_data[j, 10:20] = peaks_right[:10]
+print(np.array(feature_array).shape)
 
-
-        ##############feature: bucket
-        ######normalize
-        freq_audio_left = freq_audio_left / np.linalg.norm(freq_audio_left)
-        freq_audio_right = freq_audio_right / np.linalg.norm(freq_audio_right)
-        bucket_index = [0, 100, 200, 400, 800, 1200, 1600, 2400, 3200, 6400, 11025]
-        # bucket_index = [0, 50, 100, 150, 200, 400, 600, 800, 1000, 2000, 11025]
-        for k in range(len(bucket_index)-1):
-            lower_bound = bucket_index[k]
-            upper_bound = bucket_index[k+1]
-            featured_data[j, k] = np.sum(freq_audio_left[lower_bound:upper_bound])
-            featured_data[j, 10+k] = np.sum(freq_audio_right[lower_bound:upper_bound])
-        ##############feature: uniform bucket
-        # freq_energy_audio_left = np.sum(freq_audio_left, axis=1)
-        # freq_energy_audio_right = np.sum(freq_audio_right, axis=1)
-        # print(freq_energy_audio_left.shape, freq_energy_audio_right.shape)
-        # featured_data[j, 0:bound] = freq_energy_audio_left[0:bound]
-        # featured_data[j, bound:2*bound] = freq_energy_audio_right[0:bound]
-        
-
-        ##############feature: mfcc
-        # sampling_freq = 44100
-        # fft_size = 22050
-        # mfcc_left = mfcc(audio_left, samplerate=sampling_freq, winlen=0.25, winstep=0.125, nfft=fft_size)
-        # mfcc_right = mfcc(audio_right, samplerate=sampling_freq, winlen=0.25, winstep=0.125, nfft=fft_size)
-        # # print(mfcc_left.shape, mfcc_right.shape)
-        # featured_data[j, 0:bound] = mfcc_left.reshape(-1)
-        # featured_data[j, bound:2*bound] = mfcc_right.reshape(-1)
-
-
-        ###############feature: brute force audio
-        # featured_data[j] = segment[900:]
-        
-        
-        ##############feature: audio time (min, max, mean, std): accuracy 0.95
-        # featured_data[j, 0] = np.min(audio_left)
-        # featured_data[j, 1] = np.max(audio_left)
-        # featured_data[j, 2] = np.mean(audio_left)
-        # featured_data[j, 3] = np.std(audio_left)
-        # featured_data[j, 4] = np.min(audio_right)
-        # featured_data[j, 5] = np.max(audio_right)
-        # featured_data[j, 6] = np.mean(audio_right)
-        # featured_data[j, 7] = np.std(audio_right)
-
-    print(featured_data.shape)
-
-    feature_array.append(featured_data)
-
-print(len(feature_array))
-
+##################display
+# fig, axs = plt.subplots(len(feature_array), 1)
+# index = 0
+# for featured_data in feature_array:
+#     for data_unit in featured_data:
+#         for segment in data_unit:
+#             axs[index].plot(segment)
+#     index = index + 1
+# plt.show()
 
 ###################label process
 type_flag = []
 for i in range(len(type_array)):
-    flag = np.ones((type_array[i].shape[0])) * i
-    print(flag)
-    type_flag.append(flag)
+    type_flag.append([])
+    for j in range(len(type_array[i])):
+        flag = np.ones((type_array[i][j].shape[0])) * i
+        type_flag[i].append(flag)
+print(np.array(type_flag).shape)
 
-#concatenate
-type_set = np.concatenate(type_array)
-flag_set = np.concatenate(type_flag)
-feature_set = np.concatenate(feature_array)
-print(type_set.shape, flag_set.shape, feature_set.shape)
+###################calculate confusion
 
 res_matrix = np.zeros((len(motion_type), len(motion_type)), dtype=np.int)
 
-for i in range(100):
+for i in range(len(suffixes)):
+    #concatenate
+    flag_set = []
+    predict_flag_set = []
+    feature_set = []
+    predict_feature_set = []
+    for j in range(len(type_flag)):
+        for k in range(len(type_flag[j])):
+            if k == i:#p2
+                predict_flag_set.append(type_flag[j][k])
+                predict_feature_set.append(feature_array[j][k])
+            else:
+                flag_set.append(type_flag[j][k])
+                feature_set.append(feature_array[j][k])
+    predict_flag_set = np.concatenate(predict_flag_set)
+    predict_feature_set = np.concatenate(predict_feature_set)
+    flag_set = np.concatenate(flag_set)
+    feature_set = np.concatenate(feature_set)
     clf = SVC(kernel='rbf', gamma='auto')# ‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’
-    # print('current time: ', time.time())
-    seed = int(time.time()*10000000) % 19980608
-    # Split the data into a training set and a test set
-    X_train, X_test, y_train, y_test = train_test_split(feature_set, flag_set, test_size = 0.2, random_state=seed)
-    # Run classifier, using a model that is too regularized (C too low) to see
-    # the impact on the results
-    y_pred = clf.fit(X_train, y_train).predict(X_test)
+
+    ################use p1 data to predict p2 data
+    y_pred = clf.fit(feature_set, flag_set).predict(predict_feature_set)
 
     # Compute confusion matrix
-    cnf_matrix = confusion_matrix(y_test, y_pred)
+    cnf_matrix = confusion_matrix(predict_flag_set, y_pred)
     res_matrix = res_matrix + cnf_matrix
     np.set_printoptions(precision=2)
 
@@ -218,7 +157,7 @@ def plot_confusion_matrix(cm, classes,
     print(cm)
     
     #clear diagonal values
-    for index in classes:
+    for index in range(len(classes)):
         cm[index][index] = 0
 
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
@@ -240,7 +179,7 @@ def plot_confusion_matrix(cm, classes,
     plt.tight_layout()
 
 
-class_names = np.arange(len(motion_type))#change
+class_names = motion_type
 
 # Plot non-normalized confusion matrix
 plt.figure()

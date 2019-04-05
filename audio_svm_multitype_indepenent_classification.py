@@ -42,7 +42,7 @@ def isAtt(k):
 
 #################data upload
 
-suffixes = ['lyq/' ,'ljh/', 'jzs']
+suffixes = ['hbj/', 'lyq/' ,'ljh/', 'jzs']
 
 accuracy_score_set = []
 
