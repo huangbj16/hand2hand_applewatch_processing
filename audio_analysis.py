@@ -8,14 +8,14 @@ import random
 from lyq_quaternion_qua import rotate2
 
 is_display_on = False
-is_single_display_on = True
+is_single_display_on = False
 
 #initialize
-left_sensor = Process('data/sound/ljh/log-20190329-PxB-WatchL.txt')
+left_sensor = Process('data/sound/hbj/log-20190404-PxP-WatchL.txt')
 left_sensor.read_data()
 left_sensor.preprocess_timing_gap()
 # left_sensor.show_single_plot()
-right_sensor = Process('data/sound/ljh/log-20190329-PxB-WatchR.txt')
+right_sensor = Process('data/sound/hbj/log-20190404-PxP-WatchR.txt')
 right_sensor.read_data()
 right_sensor.preprocess_timing_gap()
 # right_sensor.show_single_plot()
@@ -23,10 +23,10 @@ right_sensor.preprocess_timing_gap()
 TIMING_DIFF = left_sensor.time[0] - right_sensor.time[0]
 right_sensor.time = [time+TIMING_DIFF for time in right_sensor.time]
 
-left_audio = AudioProcess('data/sound/ljh/log-20190329-PxB-WatchL.wav')
+left_audio = AudioProcess('data/sound/hbj/log-20190404-PxP-WatchL.wav')
 left_audio.frequency_transform()
 left_audio.mfcc_transform()
-right_audio = AudioProcess('data/sound/ljh/log-20190329-PxB-WatchR.wav')
+right_audio = AudioProcess('data/sound/hbj/log-20190404-PxP-WatchR.wav')
 right_audio.frequency_transform()
 right_audio.mfcc_transform()
 
@@ -113,7 +113,7 @@ acc_correlation, acc_left_rotated, acc_right, calculate_length = calculate_corre
 #############display raw data and correlation
 if is_display_on:
     fig, axs = plt.subplots(7, 1)
-    plt.setp(axs, ylim=(-1, 1))
+    plt.setp(axs, ylim=(-3, 3))
     # axs[0].plot(left_sensor.time[left_sensor_start:], [data[0] for data in left_sensor.data['acc'][left_sensor_start:]], right_sensor.time[right_sensor_start:], [data[0] for data in right_sensor.data['acc'][right_sensor_start:]])
     # axs[1].plot(acc_correlation[:, 0])
     # axs[2].plot(left_sensor.time[left_sensor_start:], [data[1] for data in left_sensor.data['acc'][left_sensor_start:]], right_sensor.time[right_sensor_start:], [data[1] for data in right_sensor.data['acc'][right_sensor_start:]])
@@ -161,10 +161,10 @@ right_audio_index = right_audio_start
 #detection
 print('detectiondetectiondetectiondetection')
 AUDIO_FREQ = 44100
-SENSOR_FFT_THRESHOLD = 10#change
-SENSOR_TIME_THRESHOLD = 1#change
+SENSOR_FFT_THRESHOLD = 50#change
+SENSOR_TIME_THRESHOLD = 2#change
 AUDIO_FFT_THRESHOLD = 10#change
-AUDIO_TIME_THRESHOLD = 0.1#change
+AUDIO_TIME_THRESHOLD = 0.2#change
 
 length = 50
 offset = 25
@@ -287,7 +287,7 @@ while left_sensor_index + length < len(left_sensor.time) and right_sensor_index 
         store_data[13:16] = (np.array(right_sensor.data['rot'][right_sensor_index: right_sensor_index+length]).T)
         store_data[16:20] = (np.array(right_sensor.data['qua'][right_sensor_index: right_sensor_index+length]).T)
         data_unit = store_data.T
-        print(data_unit.shape)
+        # print(data_unit.shape)
         peak_index = find_peak_index(data_unit)
         print(peak_index)
 
@@ -346,5 +346,5 @@ axs[5].plot(audio_cover_array)
 axs[6].plot(gesture_cover_array)
 plt.show()
 
-# np.save('training/sound/ljh/PxB_np', store_data_list)
+np.save('training/sound_new/hbj/PxP_np', store_data_list)
 
