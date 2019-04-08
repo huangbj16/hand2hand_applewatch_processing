@@ -14,7 +14,7 @@ from scipy import signal
 import sys
 sys.path.append('/')
 from python_audio_feature import mfcc
-
+from lyq_quaternion_qua import delta_qua
 
 def isRot(k):
     if k >= 6 and k < 9:
@@ -210,14 +210,40 @@ def feature_extraction_new(segment):
     # freq_audio_left = np.array(abs(fft(audio_left)))
     # freq_audio_right = np.array(abs(fft(audio_right)))
 
+    ##############display raw imu data
+    # fig, axs = plt.subplots(10, 2)
+    # for k in range(20):
+    #     axs[k%10][int(k/10)].plot(data_unit[:, k])
+    # # plt.setp(axs, ylim=(-20, 20))
+    # plt.show()
+
+    ###############calc delta_qua
+    # qua_left = data_unit[:, 6:10]
+    # qua_right = data_unit[:, 16:20]
+    # sub_qua = np.zeros((50, 4), dtype=float)
+    # for i in range(50):
+    #     sub_qua[i] = delta_qua(qua_left[i], qua_right[i])
+    # data_unit[:, 6:10] = sub_qua
+
+    ###############normalize acc & rot
+    # index_start = [0, 3, 10, 13]
+    # for i in index_start:
+    #     sub_data_unit = data_unit[:, i:i+3]
+    #     sub_max = np.max(np.fabs(sub_data_unit))
+    #     data_unit[:, i:i+3] = sub_data_unit / sub_max
+
     feature_offset = 52
     for k in range(20):
-        # if not isRot(k):
         data_unit_coor = data_unit[:, k]
-        featured_unit[feature_offset + 4*k] = (int(np.min(data_unit_coor) * 1000)) / 1000
-        featured_unit[feature_offset + 4*k+1] = (int(np.max(data_unit_coor) * 1000)) / 1000
-        featured_unit[feature_offset + 4*k+2] = (int(np.mean(data_unit_coor) * 1000)) / 1000
-        featured_unit[feature_offset + 4*k+3] = (int(np.std(data_unit_coor) * 1000)) / 1000
+        # featured_unit[feature_offset + 4*k] = (int(np.min(data_unit_coor) * 1000)) / 1000
+        # featured_unit[feature_offset + 4*k+1] = (int(np.max(data_unit_coor) * 1000)) / 1000
+        # featured_unit[feature_offset + 4*k+2] = (int(np.mean(data_unit_coor) * 1000)) / 1000
+        # featured_unit[feature_offset + 4*k+3] = (int(np.std(data_unit_coor) * 1000)) / 1000
+        featured_unit[feature_offset + 4*k] = np.min(data_unit_coor)
+        featured_unit[feature_offset + 4*k+1] = np.max(data_unit_coor)
+        featured_unit[feature_offset + 4*k+2] = np.mean(data_unit_coor)
+        featured_unit[feature_offset + 4*k+3] = np.std(data_unit_coor)
+        
 
     ##############feature: mfcc max min mean = : 0.9513677811550152 0.8844984802431611 0.9130699088145896
     sampling_freq = 44100
@@ -235,3 +261,8 @@ def feature_extraction_new(segment):
     # featured_unit[bound:2*bound] = np.amax(mfcc_right, axis=0)
 
     return featured_unit
+
+'''
+| mfcc energy left | mfcc energy right | acc x left | acc y left |
+| 0-------------25 | 26-------------51 | 52------55 | 56------59 |
+'''

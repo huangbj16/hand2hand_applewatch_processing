@@ -78,7 +78,9 @@ def rotate2(acc, qua0, qua1):
 	accq = np.array(accq)
 	return accq
 
-
+def delta_qua(qua0, qua1):
+	return quamul(qua0, quainv(qua1))
+	
 '''
 acc0q, qua0q = rotate(acc0, qua0)
 acc1q, qua1q = rotate(acc1, qua1)
