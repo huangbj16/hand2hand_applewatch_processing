@@ -83,7 +83,7 @@ for i in range(len(type_array)):
         primitive_data = type_array[i][j]
         data_length = primitive_data.shape[0]
         bound = 26
-        feature_length = 80+52
+        feature_length = 86
         featured_data = np.zeros((data_length, feature_length))
         for j in range(data_length):
             segment = primitive_data[j]
@@ -94,17 +94,17 @@ for i in range(len(type_array)):
 print(np.array(feature_array).shape)
 
 ##################display
-# fig, axs = plt.subplots(4, len(feature_array))
-# index = 0
-# for featured_data in feature_array:
-#     index_user = 0
-#     for data_unit in featured_data:
-#         for segment in data_unit:
-#             axs[index_user][index].plot(np.concatenate((segment[52:64], segment[92:104])))
-#         index_user = index_user + 1
-#     index = index + 1
-# plt.setp(axs, ylim=(-1, 1))
-# plt.show()
+fig, axs = plt.subplots(4, len(feature_array))
+index = 0
+for featured_data in feature_array:
+    index_user = 0
+    for data_unit in featured_data:
+        for segment in data_unit:
+            axs[index_user][index].plot(segment[80:86])
+        index_user = index_user + 1
+    index = index + 1
+# plt.setp(axs, ylim=(-10, 10))
+plt.show()
 
 ###################label process
 type_flag = []
@@ -115,6 +115,7 @@ for i in range(len(type_array)):
         type_flag[i].append(flag)
 print(np.array(type_flag).shape)
 
+####################independent classification
 
 for i in range(len(suffixes)):
 
