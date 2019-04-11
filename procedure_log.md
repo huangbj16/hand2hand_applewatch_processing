@@ -191,6 +191,10 @@ rot也可以吧？
 
 存在问题的数据：jzs DxP hbj IxP
 
+2019/4/11 log
+
+try power spectrum density features.(freq domain)
+
 todo：
 滑动识别和分类效果。
 写论文：听起来不一样，特征不一样

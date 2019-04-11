@@ -199,7 +199,7 @@ def feature_extraction_old(segment):
 
 def feature_extraction_new(segment):
     bound = 26
-    feature_length = 86
+    feature_length = 110
     featured_unit = np.zeros((feature_length))
 
     sensor_length = 1000
@@ -233,26 +233,40 @@ def feature_extraction_new(segment):
         featured_unit[feature_offset + 4*k+2] = np.mean(data_unit_coor)
         featured_unit[feature_offset + 4*k+3] = np.std(data_unit_coor)
     
-    feature_offset_peak = 0+80
-    for k in range(20):
-        if k < 3:
-            data_unit_coor = data_unit[:, k]
-            window = 0
-            peaks, _ = find_peaks(np.fabs(data_unit_coor), height=0.5)
-            if len(peaks) == 0:
-                window = -10
-            else:
-                window = (peaks[-1]-peaks[0])/len(peaks)
-            featured_unit[feature_offset_peak + k] = window
-        elif k >= 10 and k < 13:
-            data_unit_coor = data_unit[:, k]
-            window = 0
-            peaks, _ = find_peaks(np.fabs(data_unit_coor), height=0.5)
-            if len(peaks) == 0:
-                window = -10
-            else:
-                window = (peaks[-1]-peaks[0])/len(peaks)
-            featured_unit[feature_offset_peak + k-7] = window
+    ##########calc freq domain feature
+    #acc freq
+    acc_left = data_unit[:, 0:3]
+    acc_right = data_unit[:, 10:13]
+    acc_freq = np.concatenate((abs(fft(acc_left, axis=0)), abs(fft(acc_right, axis=0))), axis=1)
+    freq_feature_offset = 80
+    for k in range(6):
+        acc_freq_coor = acc_freq[:, k]
+        featured_unit[freq_feature_offset + 5*k+0] = np.max(acc_freq_coor)
+        featured_unit[freq_feature_offset + 5*k+1] = np.argmax(acc_freq_coor)
+        featured_unit[freq_feature_offset + 5*k+2] = np.median(acc_freq_coor)
+        featured_unit[freq_feature_offset + 5*k+3] = np.mean(acc_freq_coor)
+        featured_unit[freq_feature_offset + 5*k+4] = np.std(acc_freq_coor)
+
+    # feature_offset_peak = 0+80
+    # for k in range(20):
+    #     if k < 3:
+    #         data_unit_coor = data_unit[:, k]
+    #         window = 0
+    #         peaks, _ = find_peaks(np.fabs(data_unit_coor), height=0.5)
+    #         if len(peaks) == 0:
+    #             window = -10
+    #         else:
+    #             window = (peaks[-1]-peaks[0])/len(peaks)
+    #         featured_unit[feature_offset_peak + k] = window
+    #     elif k >= 10 and k < 13:
+    #         data_unit_coor = data_unit[:, k]
+    #         window = 0
+    #         peaks, _ = find_peaks(np.fabs(data_unit_coor), height=0.5)
+    #         if len(peaks) == 0:
+    #             window = -10
+    #         else:
+    #             window = (peaks[-1]-peaks[0])/len(peaks)
+    #         featured_unit[feature_offset_peak + k-7] = window
 
     
     # ###############normalize acc & rot

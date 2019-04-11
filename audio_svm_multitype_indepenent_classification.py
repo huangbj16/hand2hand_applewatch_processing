@@ -83,7 +83,7 @@ for i in range(len(type_array)):
         primitive_data = type_array[i][j]
         data_length = primitive_data.shape[0]
         bound = 26
-        feature_length = 86
+        feature_length = 110
         featured_data = np.zeros((data_length, feature_length))
         for j in range(data_length):
             segment = primitive_data[j]
@@ -100,7 +100,7 @@ for featured_data in feature_array:
     index_user = 0
     for data_unit in featured_data:
         for segment in data_unit:
-            axs[index_user][index].plot(segment[80:86])
+            axs[index_user][index].plot(segment[80:110])
         index_user = index_user + 1
     index = index + 1
 # plt.setp(axs, ylim=(-10, 10))
