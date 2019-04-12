@@ -10,6 +10,7 @@ import time
 from scipy.fftpack import fft,ifft
 from scipy.misc import electrocardiogram
 from scipy.signal import find_peaks
+from scipy.stats import entropy
 from scipy import signal
 import sys
 sys.path.append('/')
@@ -199,7 +200,7 @@ def feature_extraction_old(segment):
 
 def feature_extraction_new(segment):
     bound = 26
-    feature_length = 110
+    feature_length = 116
     featured_unit = np.zeros((feature_length))
 
     sensor_length = 1000
@@ -241,11 +242,12 @@ def feature_extraction_new(segment):
     freq_feature_offset = 80
     for k in range(6):
         acc_freq_coor = acc_freq[:, k]
-        featured_unit[freq_feature_offset + 5*k+0] = np.max(acc_freq_coor)
-        featured_unit[freq_feature_offset + 5*k+1] = np.argmax(acc_freq_coor)
-        featured_unit[freq_feature_offset + 5*k+2] = np.median(acc_freq_coor)
-        featured_unit[freq_feature_offset + 5*k+3] = np.mean(acc_freq_coor)
-        featured_unit[freq_feature_offset + 5*k+4] = np.std(acc_freq_coor)
+        featured_unit[freq_feature_offset + 6*k+0] = np.max(acc_freq_coor)
+        featured_unit[freq_feature_offset + 6*k+1] = np.argmax(acc_freq_coor)
+        featured_unit[freq_feature_offset + 6*k+2] = np.median(acc_freq_coor)
+        featured_unit[freq_feature_offset + 6*k+3] = np.mean(acc_freq_coor)
+        featured_unit[freq_feature_offset + 6*k+4] = np.std(acc_freq_coor)
+        featured_unit[freq_feature_offset + 6*k+5] = entropy(acc_freq_coor)
 
     # feature_offset_peak = 0+80
     # for k in range(20):
