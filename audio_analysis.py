@@ -346,5 +346,9 @@ axs[5].plot(audio_cover_array)
 axs[6].plot(gesture_cover_array)
 plt.show()
 
-np.save('training/sound_new/hbj/PxP_np', store_data_list)
+gestures_I = ['IxP', 'IxB', 'IxI', 'IxFU', 'IxG']
+gestures_P = ['FDxFD', 'PxFU', 'FDxP', 'DxU', 'FDxFU']
+for i in range(5):
+    previous_data = np.load('training/sound_final/hbj/'+ gestures_P[i] + '_np.npy')
+    np.save('training/sound_final/hbj/' + gestures_P[i] + '_np', np.concatenate((previous_data, store_data_list[10*i:10*(i+1)])))
 
