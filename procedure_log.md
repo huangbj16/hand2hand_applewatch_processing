@@ -199,6 +199,11 @@ try power spectrum density features.(freq domain)
 
 try entropy feature, need more test
 
+2019/4/13 log
+
+归一化之后再计算了freq features，准确率基本接近。
+[0.58, 0.7252475247524752, 0.691358024691358, 0.6262376237623762]
+
 todo：
 滑动识别和分类效果。
 写论文：听起来不一样，特征不一样

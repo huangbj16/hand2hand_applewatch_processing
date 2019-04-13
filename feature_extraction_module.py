@@ -200,7 +200,7 @@ def feature_extraction_old(segment):
 
 def feature_extraction_new(segment):
     bound = 26
-    feature_length = 116
+    feature_length = 80+36
     featured_unit = np.zeros((feature_length))
 
     sensor_length = 1000
@@ -236,18 +236,29 @@ def feature_extraction_new(segment):
     
     ##########calc freq domain feature
     #acc freq
-    acc_left = data_unit[:, 0:3]
-    acc_right = data_unit[:, 10:13]
+    acc_left = data_unit[:, 0:3] / np.linalg.norm(data_unit[:, 0:3])
+    acc_right = data_unit[:, 10:13] / np.linalg.norm(data_unit[:, 10:13])
     acc_freq = np.concatenate((abs(fft(acc_left, axis=0)), abs(fft(acc_right, axis=0))), axis=1)
     freq_feature_offset = 80
     for k in range(6):
         acc_freq_coor = acc_freq[:, k]
-        featured_unit[freq_feature_offset + 6*k+0] = np.max(acc_freq_coor)
-        featured_unit[freq_feature_offset + 6*k+1] = np.argmax(acc_freq_coor)
-        featured_unit[freq_feature_offset + 6*k+2] = np.median(acc_freq_coor)
-        featured_unit[freq_feature_offset + 6*k+3] = np.mean(acc_freq_coor)
-        featured_unit[freq_feature_offset + 6*k+4] = np.std(acc_freq_coor)
-        featured_unit[freq_feature_offset + 6*k+5] = entropy(acc_freq_coor)
+        featured_unit[freq_feature_offset + k+6*0] = np.max(acc_freq_coor)
+        featured_unit[freq_feature_offset + k+6*1] = np.argmax(acc_freq_coor)
+        featured_unit[freq_feature_offset + k+6*2] = np.median(acc_freq_coor)
+        featured_unit[freq_feature_offset + k+6*3] = np.mean(acc_freq_coor)
+        featured_unit[freq_feature_offset + k+6*4] = np.std(acc_freq_coor)
+        featured_unit[freq_feature_offset + k+6*5] = entropy(acc_freq_coor)
+
+    # acc_left = data_unit[:, 0:3] / np.linalg.norm(data_unit[:, 0:3])
+    # acc_right = data_unit[:, 10:13] / np.linalg.norm(data_unit[:, 10:13])
+    # acc_comb = np.concatenate((acc_left, acc_right), axis=1)
+    # freq_feature_offset = 80
+    # sampling_freq = 100
+    # fft_size = 50
+    # for k in range(6):
+    #     acc_coor = acc_comb[:, k]
+    #     mfcc_acc_coor = mfcc(acc_coor, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
+    #     featured_unit[freq_feature_offset + k*26: freq_feature_offset + (k+1)*26] = mfcc_acc_coor
 
     # feature_offset_peak = 0+80
     # for k in range(20):
