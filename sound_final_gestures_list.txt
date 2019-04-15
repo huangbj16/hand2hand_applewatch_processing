@@ -1,0 +1,1 @@
+['IxP', 'IxB', 'IxI', 'IxFU', 'IxG', 'FUxFU', 'DxU', 'FDxFU', 'PxFU', 'FDxP']

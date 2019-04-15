@@ -8,14 +8,20 @@ import random
 from lyq_quaternion_qua import rotate2
 
 is_display_on = False
-is_single_display_on = False
+is_single_display_on = True
+ready_for_save = False
+
+order_index = 19
+order_file = open('data/sound_final/hbj/order.txt')
+order_line = order_file.readlines()[int(order_index/2)]
+order_list = order_line.split()[(order_index%2)*5 : ((order_index%2)+1)*5]
 
 #initialize
-left_sensor = Process('data/sound/hbj/log-20190404-PxP-WatchL.txt')
+left_sensor = Process('data/sound_final/hbj/log-20190415-161350-WatchL.txt')
 left_sensor.read_data()
 left_sensor.preprocess_timing_gap()
 # left_sensor.show_single_plot()
-right_sensor = Process('data/sound/hbj/log-20190404-PxP-WatchR.txt')
+right_sensor = Process('data/sound_final/hbj/log-20190415-161350-WatchR.txt')
 right_sensor.read_data()
 right_sensor.preprocess_timing_gap()
 # right_sensor.show_single_plot()
@@ -23,10 +29,10 @@ right_sensor.preprocess_timing_gap()
 TIMING_DIFF = left_sensor.time[0] - right_sensor.time[0]
 right_sensor.time = [time+TIMING_DIFF for time in right_sensor.time]
 
-left_audio = AudioProcess('data/sound/hbj/log-20190404-PxP-WatchL.wav')
+left_audio = AudioProcess('data/sound_final/hbj/log-20190415-161350-WatchL.wav')
 left_audio.frequency_transform()
 left_audio.mfcc_transform()
-right_audio = AudioProcess('data/sound/hbj/log-20190404-PxP-WatchR.wav')
+right_audio = AudioProcess('data/sound_final/hbj/log-20190415-161350-WatchR.wav')
 right_audio.frequency_transform()
 right_audio.mfcc_transform()
 
@@ -56,7 +62,7 @@ if is_autoalign:
             segment_index = np.argmax(np.fabs(segment))
             # print(segment)
             # print(unit_index, segment_index)
-            left_sensor_start = unit_index + segment_index % 50 + 50
+            left_sensor_start = unit_index + int(segment_index / 3) + 50
             break
     for unit_index in range(len(right_sensor.time)):
         unit = right_sensor.data['acc'][unit_index]
@@ -66,18 +72,20 @@ if is_autoalign:
             segment_index = np.argmax(np.fabs(segment)) 
             # print(segment)
             # print(unit_index, segment_index)
-            right_sensor_start = unit_index + segment_index % 50 + 50
+            right_sensor_start = unit_index + int(segment_index / 3) + 50
             break
-    for unit_index in range(len(left_audio.audio)):
-        unit = left_audio.audio[unit_index]
+    #audio offset to ignore the initial noise.
+    audio_initial_offset = 11025
+    for unit_index in range(len(left_audio.audio)-audio_initial_offset):
+        unit = left_audio.audio[unit_index+audio_initial_offset]
         if np.max(np.fabs(unit)) > autoalign_threshold_audio:
             #pick the peak
             segment = left_audio.audio[unit_index-11025: unit_index+11025]
             segment_index = np.argmax(np.fabs(segment)) % 22050
             left_audio_start = unit_index + segment_index + 22050
             break
-    for unit_index in range(len(right_audio.audio)):
-        unit = right_audio.audio[unit_index]
+    for unit_index in range(len(right_audio.audio)-audio_initial_offset):
+        unit = right_audio.audio[unit_index+audio_initial_offset]
         if np.max(np.fabs(unit)) > autoalign_threshold_audio:
             #pick the peak
             segment = right_audio.audio[unit_index-11025: unit_index+11025]
@@ -161,10 +169,10 @@ right_audio_index = right_audio_start
 #detection
 print('detectiondetectiondetectiondetection')
 AUDIO_FREQ = 44100
-SENSOR_FFT_THRESHOLD = 50#change
-SENSOR_TIME_THRESHOLD = 2#change
+SENSOR_FFT_THRESHOLD = 10#change
+SENSOR_TIME_THRESHOLD = 1#change
 AUDIO_FFT_THRESHOLD = 10#change
-AUDIO_TIME_THRESHOLD = 0.2#change
+AUDIO_TIME_THRESHOLD = 0.01#change
 
 length = 50
 offset = 25
@@ -201,10 +209,14 @@ def find_peak_index(data_unit):
 bucket_tot_left = []
 bucket_tot_right = []
 
+print(left_audio.audio.shape[0], right_audio.audio.shape[0], audio_length)
+
 while left_sensor_index + length < len(left_sensor.time) and right_sensor_index + length < len(right_sensor.time):
     left_audio_index = int((left_sensor.time[left_sensor_index] - left_sensor.time[left_sensor_start]) * AUDIO_FREQ) + left_audio_start
     right_audio_index = int((right_sensor.time[right_sensor_index] - right_sensor.time[right_sensor_start]) * AUDIO_FREQ) + right_audio_start
+    print(left_sensor_index, right_sensor_index, left_audio_index, right_audio_index)
     if left_audio_index + audio_length > left_audio.audio.shape[0] or right_audio_index + audio_length > right_audio.audio.shape[0]:
+        print(left_audio.audio.shape[0], right_audio.audio.shape[0], audio_length)
         print('out of bound')
         break
     
@@ -336,6 +348,8 @@ if is_display_on:
         axs[i][1].plot([bucket[i][1] for bucket in bucket_tot_right])
     plt.show()
 
+print(order_list)
+
 fig, axs = plt.subplots(7, 1)
 axs[0].plot(range(len(left_sensor.time)-left_sensor_start), [data[0] for data in left_sensor.data['acc'][left_sensor_start:]], range(len(right_sensor.time)-right_sensor_start), [data[0] for data in right_sensor.data['acc'][right_sensor_start:]])
 axs[1].plot(range(len(left_sensor.time)-left_sensor_start), [data[1] for data in left_sensor.data['acc'][left_sensor_start:]], range(len(right_sensor.time)-right_sensor_start), [data[1] for data in right_sensor.data['acc'][right_sensor_start:]])
@@ -346,9 +360,13 @@ axs[5].plot(audio_cover_array)
 axs[6].plot(gesture_cover_array)
 plt.show()
 
-gestures_I = ['IxP', 'IxB', 'IxI', 'IxFU', 'IxG']
-gestures_P = ['FDxFD', 'PxFU', 'FDxP', 'DxU', 'FDxFU']
-for i in range(5):
-    previous_data = np.load('training/sound_final/hbj/'+ gestures_P[i] + '_np.npy')
-    np.save('training/sound_final/hbj/' + gestures_P[i] + '_np', np.concatenate((previous_data, store_data_list[10*i:10*(i+1)])))
+
+
+if ready_for_save:
+    index = [5,5,5,5,5]
+    save_start = 0
+    for i in range(5):
+        print(save_start, save_start+index[i])
+        np.save('training/sound_final/hbj/' + str(order_index) + '/' + order_list[i] + '_np', store_data_list[save_start : save_start+index[i]])
+        save_start = save_start + index[i]
 
