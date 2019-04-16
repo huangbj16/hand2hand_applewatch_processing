@@ -46,10 +46,10 @@ type_array = []
 
 motion_type = []
 
-suffixes = ['hbj/', 'lyq/', 'jzs/', 'ljh/']
+suffixes = ['hbj/', 'lyq/', 'yzc/']
 
 for suffix in suffixes:
-    rootdir = 'training/sound_new/'+suffix
+    rootdir = 'training/sound_final/'+suffix+'combination/'
     list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
     for i in range(0, len(list)):
         if 'IyP' in list[i]:
@@ -95,7 +95,7 @@ for i in range(len(type_array)):
     primitive_data = type_array[i]
     data_length = primitive_data.shape[0]
     bound = 26
-    feature_length = 40+52
+    feature_length = 80+52
     featured_data = np.zeros((data_length, feature_length))
     print('type:', motion_type[i])
     for j in range(data_length):

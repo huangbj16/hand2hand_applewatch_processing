@@ -7,21 +7,21 @@ from audio_module import AudioProcess
 import random
 from lyq_quaternion_qua import rotate2
 
-is_display_on = False
-is_single_display_on = True
-ready_for_save = False
+is_display_on = True
+is_single_display_on = False
+ready_for_save = True
 
 order_index = 19
-order_file = open('data/sound_final/hbj/order.txt')
+order_file = open('data/sound_final/yzc/order.txt')
 order_line = order_file.readlines()[int(order_index/2)]
 order_list = order_line.split()[(order_index%2)*5 : ((order_index%2)+1)*5]
 
 #initialize
-left_sensor = Process('data/sound_final/hbj/log-20190415-161350-WatchL.txt')
+left_sensor = Process('data/sound_final/yzc/log-20190416-094341-WatchL.txt')
 left_sensor.read_data()
 left_sensor.preprocess_timing_gap()
 # left_sensor.show_single_plot()
-right_sensor = Process('data/sound_final/hbj/log-20190415-161350-WatchR.txt')
+right_sensor = Process('data/sound_final/yzc/log-20190416-094341-WatchR.txt')
 right_sensor.read_data()
 right_sensor.preprocess_timing_gap()
 # right_sensor.show_single_plot()
@@ -29,10 +29,10 @@ right_sensor.preprocess_timing_gap()
 TIMING_DIFF = left_sensor.time[0] - right_sensor.time[0]
 right_sensor.time = [time+TIMING_DIFF for time in right_sensor.time]
 
-left_audio = AudioProcess('data/sound_final/hbj/log-20190415-161350-WatchL.wav')
+left_audio = AudioProcess('data/sound_final/yzc/log-20190416-094341-WatchL.wav')
 left_audio.frequency_transform()
 left_audio.mfcc_transform()
-right_audio = AudioProcess('data/sound_final/hbj/log-20190415-161350-WatchR.wav')
+right_audio = AudioProcess('data/sound_final/yzc/log-20190416-094341-WatchR.wav')
 right_audio.frequency_transform()
 right_audio.mfcc_transform()
 
@@ -53,7 +53,7 @@ is_autoalign = True#change
 #auto align
 if is_autoalign:
     autoalign_threshold_sensor = 5#change
-    autoalign_threshold_audio = 0.5#change
+    autoalign_threshold_audio = 0.3#change
     for unit_index in range(len(left_sensor.time)):
         unit = left_sensor.data['acc'][unit_index]
         if np.max(np.fabs(unit)) > autoalign_threshold_sensor:
@@ -367,6 +367,6 @@ if ready_for_save:
     save_start = 0
     for i in range(5):
         print(save_start, save_start+index[i])
-        np.save('training/sound_final/hbj/' + str(order_index) + '/' + order_list[i] + '_np', store_data_list[save_start : save_start+index[i]])
+        np.save('training/sound_final/yzc/' + str(order_index) + '/' + order_list[i] + '_np', store_data_list[save_start : save_start+index[i]])
         save_start = save_start + index[i]
 
