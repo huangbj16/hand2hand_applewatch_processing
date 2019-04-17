@@ -200,7 +200,7 @@ def feature_extraction_old(segment):
 
 def feature_extraction_new(segment):
     bound = 26
-    feature_length = 80+52
+    feature_length = 80
     featured_unit = np.zeros((feature_length))
 
     sensor_length = 1000
@@ -226,7 +226,7 @@ def feature_extraction_new(segment):
     #     sub_qua[i] = delta_qua(qua_left[i], qua_right[i])
     # data_unit[:, 6:10] = sub_qua
 
-    feature_offset = 52
+    feature_offset = 0
     for k in range(20):
         data_unit_coor = data_unit[:, k]
         featured_unit[feature_offset + 4*k] = np.min(data_unit_coor)
@@ -235,7 +235,7 @@ def feature_extraction_new(segment):
         featured_unit[feature_offset + 4*k+3] = np.std(data_unit_coor)
     
     ##########calc freq domain feature
-    #acc freq
+    # #acc freq
     # acc_left = data_unit[:, 0:3] / np.linalg.norm(data_unit[:, 0:3])
     # acc_right = data_unit[:, 10:13] / np.linalg.norm(data_unit[:, 10:13])
     # acc_freq = np.concatenate((abs(fft(acc_left, axis=0)), abs(fft(acc_right, axis=0))), axis=1)
@@ -282,34 +282,35 @@ def feature_extraction_new(segment):
     #         featured_unit[feature_offset_peak + k-7] = window
 
     
-    # ###############normalize acc & rot
+    ###############normalize acc & rot
     # index_start = [0, 3, 10, 13]
     # for i in index_start:
     #     sub_data_unit = data_unit[:, i:i+3]
-    #     sub_max = np.max(np.fabs(sub_data_unit))
-    #     data_unit[:, i:i+3] = sub_data_unit / sub_max
+    #     sub_norm = np.linalg.norm(sub_data_unit)
+    #     data_unit[:, i:i+3] = sub_data_unit / sub_norm
 
-    # feature_offset_normalization = 52+80
+    # feature_offset_normalization = 80
     # for k in range(20):
+    #     data_unit_coor = data_unit[:, k]
     #     featured_unit[feature_offset_normalization + 4*k] = np.min(data_unit_coor)
     #     featured_unit[feature_offset_normalization + 4*k+1] = np.max(data_unit_coor)
     #     featured_unit[feature_offset_normalization + 4*k+2] = np.mean(data_unit_coor)
     #     featured_unit[feature_offset_normalization + 4*k+3] = np.std(data_unit_coor)
 
     ##############feature: mfcc max min mean = : 0.9513677811550152 0.8844984802431611 0.9130699088145896
-    sampling_freq = 44100
-    fft_size = 22050
-    audio_left = audio_left / np.linalg.norm(audio_left)
-    audio_right = audio_right / np.linalg.norm(audio_right)
-    mfcc_left = mfcc(audio_left, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
-    mfcc_right = mfcc(audio_right, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
-    # print(mfcc_left.shape, mfcc_right.shape)
-    # print(np.mean(mfcc_left, axis=0).shape)
-    # exit(0)
-    featured_unit[0:bound] = np.abs(mfcc_left).reshape(-1)
-    featured_unit[bound:2*bound] = np.abs(mfcc_right).reshape(-1)
-    # featured_unit[0:bound] = np.amax(mfcc_left, axis=0)
-    # featured_unit[bound:2*bound] = np.amax(mfcc_right, axis=0)
+    # sampling_freq = 44100
+    # fft_size = 22050
+    # audio_left = audio_left / np.linalg.norm(audio_left)
+    # audio_right = audio_right / np.linalg.norm(audio_right)
+    # mfcc_left = mfcc(audio_left, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
+    # mfcc_right = mfcc(audio_right, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
+    # # print(mfcc_left.shape, mfcc_right.shape)
+    # # print(np.mean(mfcc_left, axis=0).shape)
+    # # exit(0)
+    # featured_unit[0:bound] = np.abs(mfcc_left).reshape(-1)
+    # featured_unit[bound:2*bound] = np.abs(mfcc_right).reshape(-1)
+    # # featured_unit[0:bound] = np.amax(mfcc_left, axis=0)
+    # # featured_unit[bound:2*bound] = np.amax(mfcc_right, axis=0)
 
     return featured_unit
 

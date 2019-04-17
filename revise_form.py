@@ -4,7 +4,7 @@ import numpy as np
 gestures_list = []
 gestures_type = []
 
-rootdir = 'data/sound_final/yzc/'
+rootdir = 'data/sound_final/rj/'
 list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
 print(list)
 for filename in list:

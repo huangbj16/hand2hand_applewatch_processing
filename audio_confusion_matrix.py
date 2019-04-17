@@ -75,7 +75,7 @@ def plot_confusion_matrix(cm, classes,
 
 #################data upload
 
-suffixes = ['hbj/', 'lyq/', 'yzc/']
+suffixes = ['hbj/', 'lyq/', 'yzc/', 'rj/']
 
 accuracy_score_set = []
 
@@ -86,7 +86,7 @@ for suffix in suffixes:
     rootdir = 'training/sound_final/'+suffix+'combination/'
     list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
     for i in range(0, len(list)):
-        if 'IyP' in list[i]:
+        if '6' in list[i]:
             continue
         path = os.path.join(rootdir,list[i])
         print(path)
@@ -114,7 +114,7 @@ for i in range(len(type_array)):
         primitive_data = type_array[i][j]
         data_length = primitive_data.shape[0]
         bound = 26
-        feature_length = 80+52
+        feature_length = 80
         featured_data = np.zeros((data_length, feature_length))
         print('type:', motion_type[i])
         for j in range(data_length):
