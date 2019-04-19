@@ -10,7 +10,7 @@ print('categories: ', all_categories)
 
 #const number
 n_seqlen = 50
-n_inputsize = 18
+n_inputsize = 20
 n_hidden = 128
 n_epochs = 2000
 learning_rate = 0.1 # If you set this too high, it might explode. If too low, it might not learn
@@ -48,9 +48,10 @@ criterion = nn.NLLLoss()
 # 还需要一层全相连
 
 # 切割数据集
-seed = int(time.time()*10000000) % 19980608
-X_train, X_test, y_train, y_test = train_test_split(feature_set, flag_set, test_size=0.2, random_state=seed)
-print('split result shape: ', X_train.shape, X_test.shape, y_train.shape, y_test.shape)
+# seed = int(time.time()*10000000) % 19980608
+# X_train, X_test, y_train, y_test = train_test_split(feature_set, flag_set, test_size=0.2, random_state=seed)
+# print('split result shape: ', X_train.shape, X_test.shape, y_train.shape, y_test.shape)
+X_train, X_test, y_train, y_test = feature_train_set, feature_test_set, flag_train_set, flag_test_set
 
 valid_result = []
 test_result = []
@@ -62,7 +63,7 @@ for epoch in range(n_epochs):
     seed = int(time.time()*10000000) % 19980608
     epoch_X_train, epoch_X_test, epoch_y_train, epoch_y_test = train_test_split(X_train, y_train, test_size=0.9, random_state=seed)
     # 训练
-    epoch_X_train = epoch_X_train.reshape(-1, 50, 18)
+    epoch_X_train = epoch_X_train.reshape(-1, 50, 20)
 
     output = net(epoch_X_train)
 
@@ -75,7 +76,7 @@ for epoch in range(n_epochs):
     if epoch % 10 == 0:
 
         #验证
-        X_valid = X_train.reshape(-1, 50, 18)
+        X_valid = X_train.reshape(-1, 50, 20)
         output = net(X_valid)
         count = 0
         for i in range(y_train.shape[0]):
@@ -84,7 +85,7 @@ for epoch in range(n_epochs):
         print(count/y_train.shape[0])
         valid_result.append(count/y_train.shape[0])
         #测试
-        X_test = X_test.reshape(-1, 50, 18)
+        X_test = X_test.reshape(-1, 50, 20)
         output = net(X_test)
         count = 0
         for i in range(y_test.shape[0]):

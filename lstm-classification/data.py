@@ -3,6 +3,7 @@ import glob
 import unicodedata
 import string
 import numpy as np
+import os
 
 def findFiles(path): return glob.glob(path)
 
@@ -15,20 +16,30 @@ def read_data(filename):
 # Build the category_lines dictionary, a list of lines per category
 category_lines = []
 all_categories = []
-for filename in findFiles('../training/motion/*.npy'):
-    category = filename.split('_')[-2]
-    all_categories.append(category)
-    data = read_data(filename)
-    category_lines.append(data) #此时数据data为n*900的nparray
+suffixes = ['hbj/', 'lyq/', 'yzc/', 'rj/']
+for suffix in suffixes:
+    rootdir = '../training/sound_final/'+suffix+'combination/'
+    list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
+    for i in range(0, len(list)):
+        category = list[i].split('_')[0]
+        all_categories.append(category)
+        filename = os.path.join(rootdir,list[i])
+        data = read_data(filename)
+        print(data.shape)
+        data = data[:, 0:1000]
+        category_lines.append(data) #此时数据data为n*1000的nparray
     
 
-n_categories = len(all_categories)
+n_categories = int(len(all_categories) / len(suffixes))
+print(n_categories, all_categories)
 
 flag_lines = []
-for i in range(n_categories):
-    flag = np.ones(category_lines[i].shape[0]) * i
+for i in range(len(all_categories)):
+    flag = np.ones(category_lines[i].shape[0]) * int(all_categories[i])
     flag_lines.append(flag)
 
-feature_set = np.concatenate(category_lines)
-flag_set = np.concatenate(flag_lines)
-print(feature_set.shape, flag_set.shape)
+feature_train_set = np.concatenate((category_lines[10:40]))
+flag_train_set = np.concatenate((flag_lines[10:40]))
+feature_test_set = np.concatenate((category_lines[0:10]))
+flag_test_set = np.concatenate((flag_lines[0:10]))
+print(feature_train_set.shape, flag_train_set.shape, feature_test_set.shape, flag_test_set.shape)

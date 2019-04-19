@@ -42,7 +42,7 @@ def isAtt(k):
 
 #################data upload
 
-suffixes = ['hbj/', 'lyq/', 'yzc/', 'rj/']
+suffixes = ['hbj/', 'lyq/', 'jzs', 'ljh']
 
 accuracy_score_set = []
 
@@ -50,10 +50,10 @@ type_array = []
 motion_type = []
 
 for suffix in suffixes:
-    rootdir = 'training/sound_final/'+suffix+'combination/'
+    rootdir = 'training/sound_new/'+suffix
     list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
     for i in range(0, len(list)):
-        if '6' in list[i] or '4' in list[i]:
+        if not 'IyP' in list[i]:
             continue
         path = os.path.join(rootdir,list[i])
         print(path)
@@ -100,7 +100,7 @@ for featured_data in feature_array:
     index_user = 0
     for data_unit in featured_data:
         for segment in data_unit:
-            axs[index_user][index].plot(segment[0:20])
+            axs[index_user][index].plot(segment[64:80])
         index_user = index_user + 1
     index = index + 1
 # plt.setp(axs, ylim=(-10, 10))

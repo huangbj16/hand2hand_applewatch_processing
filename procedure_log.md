@@ -204,6 +204,20 @@ try entropy feature, need more test
 归一化之后再计算了freq features，准确率基本接近。
 [0.58, 0.7252475247524752, 0.691358024691358, 0.6262376237623762]
 
+2019/4/19 log
+前几天的工作未更新于此。
+今天准备采数据和解决滑动问题。
+解决滑动需要解决两个问题：
+    1.detection是否准确，得到的是否是准确的数据；
+    2.对于滑动的classification应该用怎样的特征来表示。
+另外，好久没动的lstm应该可以再次排上用场了。
+
+lstm dependent: 99 96.
+lstm independent: 
+    problems with boys predicting girls.
+    boys and girls predicting boys seems to work well. 0.9 0.74
+lstm还可以尝试其它形式的网络，比如把处理好的feature扔进去也许能提高训练速度和准确率。
+
 todo：
 滑动识别和分类效果。
 写论文：听起来不一样，特征不一样
