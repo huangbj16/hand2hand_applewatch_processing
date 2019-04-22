@@ -226,6 +226,13 @@ def feature_extraction_new(segment):
     #     sub_qua[i] = delta_qua(qua_left[i], qua_right[i])
     # data_unit[:, 6:10] = sub_qua
 
+    ##############normalize acc & rot
+    index_start = [0, 3, 10, 13]
+    for i in index_start:
+        sub_data_unit = data_unit[:, i:i+3]
+        sub_norm = np.linalg.norm(sub_data_unit)
+        data_unit[:, i:i+3] = sub_data_unit / sub_norm
+
     feature_offset = 0
     for k in range(20):
         data_unit_coor = data_unit[:, k]
@@ -280,14 +287,6 @@ def feature_extraction_new(segment):
     #         else:
     #             window = (peaks[-1]-peaks[0])/len(peaks)
     #         featured_unit[feature_offset_peak + k-7] = window
-
-    
-    ###############normalize acc & rot
-    # index_start = [0, 3, 10, 13]
-    # for i in index_start:
-    #     sub_data_unit = data_unit[:, i:i+3]
-    #     sub_norm = np.linalg.norm(sub_data_unit)
-    #     data_unit[:, i:i+3] = sub_data_unit / sub_norm
 
     # feature_offset_normalization = 80
     # for k in range(20):

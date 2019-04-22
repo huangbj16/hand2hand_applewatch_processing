@@ -4,11 +4,11 @@ import numpy as np
 gestures_list = []
 gestures_type = []
 
-rootdir = 'data/sound_final/rj/'
+rootdir = 'data/sound_final/yyw/'
 list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
 print(list)
 for filename in list:
-    if not 'R.txt' in filename:
+    if not '.txt' in filename:
         continue
     print(filename)
     path = os.path.join(rootdir, filename)

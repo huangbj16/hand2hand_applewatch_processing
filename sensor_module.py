@@ -39,7 +39,7 @@ class Process(object):
         timing_gap = []
         for i in range(len(self.time)-1):
             timing_gap.append(self.time[i+1]-self.time[i])
-            if self.time[i+1]-self.time[i] > 1:
+            if abs(self.time[i+1]-self.time[i]) > 1:
                 print('gg')
                 print(self.time[i+1], self.time[i])
                 exit(0)

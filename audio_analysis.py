@@ -11,17 +11,19 @@ is_display_on = False
 is_single_display_on = False
 ready_for_save = True
 
+save_index = [5,5,5,5,5]
+
 order_index = 19
-order_file = open('data/sound_final/rj/order.txt')
+order_file = open('data/sound_final/yyw/order.txt')
 order_line = order_file.readlines()[int(order_index/2)]
 order_list = order_line.split()[(order_index%2)*5 : ((order_index%2)+1)*5]
 
 #initialize
-left_sensor = Process('data/sound_final/rj/log-20190416-104114-WatchL.txt')
+left_sensor = Process('data/sound_final/yyw/log-20190422-152957-WatchL.txt')
 left_sensor.read_data()
 left_sensor.preprocess_timing_gap()
 # left_sensor.show_single_plot()
-right_sensor = Process('data/sound_final/rj/log-20190416-104114-WatchR.txt')
+right_sensor = Process('data/sound_final/yyw/log-20190422-152957-WatchR.txt')
 right_sensor.read_data()
 right_sensor.preprocess_timing_gap()
 # right_sensor.show_single_plot()
@@ -29,10 +31,10 @@ right_sensor.preprocess_timing_gap()
 TIMING_DIFF = left_sensor.time[0] - right_sensor.time[0]
 right_sensor.time = [time+TIMING_DIFF for time in right_sensor.time]
 
-left_audio = AudioProcess('data/sound_final/rj/log-20190416-104114-WatchL.wav')
+left_audio = AudioProcess('data/sound_final/yyw/log-20190422-152957-WatchL.wav')
 left_audio.frequency_transform()
 left_audio.mfcc_transform()
-right_audio = AudioProcess('data/sound_final/rj/log-20190416-104114-WatchR.wav')
+right_audio = AudioProcess('data/sound_final/yyw/log-20190422-152957-WatchR.wav')
 right_audio.frequency_transform()
 right_audio.mfcc_transform()
 
@@ -52,8 +54,8 @@ right_audio_start = 0
 is_autoalign = True#change
 #auto align
 if is_autoalign:
-    autoalign_threshold_sensor = 2#change
-    autoalign_threshold_audio = 0.15#change
+    autoalign_threshold_sensor = 4#change
+    autoalign_threshold_audio = 0.3#change
     for unit_index in range(len(left_sensor.time)):
         unit = left_sensor.data['acc'][unit_index]
         if np.max(np.fabs(unit)) > autoalign_threshold_sensor:
@@ -119,23 +121,23 @@ def calculate_correlation(acc_left, acc_right, qua_left, qua_right):
 acc_correlation, acc_left_rotated, acc_right, calculate_length = calculate_correlation(left_sensor.data['acc'][left_sensor_start:], right_sensor.data['acc'][right_sensor_start:], left_sensor.data['qua'][left_sensor_start:], right_sensor.data['qua'][right_sensor_start:])
 
 #############display raw data and correlation
-if is_display_on:
-    fig, axs = plt.subplots(4, 1)
-    # plt.setp(axs, ylim=(-3, 3))
-    # axs[0].plot(left_sensor.time[left_sensor_start:], [data[0] for data in left_sensor.data['acc'][left_sensor_start:]], right_sensor.time[right_sensor_start:], [data[0] for data in right_sensor.data['acc'][right_sensor_start:]])
-    # axs[1].plot(acc_correlation[:, 0])
-    # axs[2].plot(left_sensor.time[left_sensor_start:], [data[1] for data in left_sensor.data['acc'][left_sensor_start:]], right_sensor.time[right_sensor_start:], [data[1] for data in right_sensor.data['acc'][right_sensor_start:]])
-    # axs[3].plot(acc_correlation[:, 1])
-    # axs[4].plot(left_sensor.time[left_sensor_start:], [data[2] for data in left_sensor.data['acc'][left_sensor_start:]], right_sensor.time[right_sensor_start:], [data[2] for data in right_sensor.data['acc'][right_sensor_start:]])
-    # axs[5].plot(acc_correlation[:, 2])
-    axs[0].plot(range(calculate_length), acc_left_rotated[:, 0], range(calculate_length), acc_right[:, 0])
-    # axs[1].plot(acc_correlation[:, 0])
-    axs[1].plot(range(calculate_length), acc_left_rotated[:, 1], range(calculate_length), acc_right[:, 1])
-    # axs[3].plot(acc_correlation[:, 1])
-    axs[2].plot(range(calculate_length), acc_left_rotated[:, 2], range(calculate_length), acc_right[:, 2])
-    # axs[5].plot(acc_correlation[:, 2])
-    axs[3].plot(range(left_audio.audio.shape[0]-left_audio_start), left_audio.audio[left_audio_start:], range(right_audio.audio.shape[0]-right_audio_start), right_audio.audio[right_audio_start:])
-    plt.show()
+# if is_display_on:
+fig, axs = plt.subplots(4, 1)
+# plt.setp(axs, ylim=(-3, 3))
+# axs[0].plot(left_sensor.time[left_sensor_start:], [data[0] for data in left_sensor.data['acc'][left_sensor_start:]], right_sensor.time[right_sensor_start:], [data[0] for data in right_sensor.data['acc'][right_sensor_start:]])
+# axs[1].plot(acc_correlation[:, 0])
+# axs[2].plot(left_sensor.time[left_sensor_start:], [data[1] for data in left_sensor.data['acc'][left_sensor_start:]], right_sensor.time[right_sensor_start:], [data[1] for data in right_sensor.data['acc'][right_sensor_start:]])
+# axs[3].plot(acc_correlation[:, 1])
+# axs[4].plot(left_sensor.time[left_sensor_start:], [data[2] for data in left_sensor.data['acc'][left_sensor_start:]], right_sensor.time[right_sensor_start:], [data[2] for data in right_sensor.data['acc'][right_sensor_start:]])
+# axs[5].plot(acc_correlation[:, 2])
+axs[0].plot(range(calculate_length), acc_left_rotated[:, 0], range(calculate_length), acc_right[:, 0])
+# axs[1].plot(acc_correlation[:, 0])
+axs[1].plot(range(calculate_length), acc_left_rotated[:, 1], range(calculate_length), acc_right[:, 1])
+# axs[3].plot(acc_correlation[:, 1])
+axs[2].plot(range(calculate_length), acc_left_rotated[:, 2], range(calculate_length), acc_right[:, 2])
+# axs[5].plot(acc_correlation[:, 2])
+axs[3].plot(range(left_audio.audio.shape[0]-left_audio_start), left_audio.audio[left_audio_start:], range(right_audio.audio.shape[0]-right_audio_start), right_audio.audio[right_audio_start:])
+plt.show()
     
 
 #############display
@@ -170,9 +172,9 @@ right_audio_index = right_audio_start
 print('detectiondetectiondetectiondetection')
 AUDIO_FREQ = 44100
 SENSOR_FFT_THRESHOLD = 10#change
-SENSOR_TIME_THRESHOLD = 0.5#change
+SENSOR_TIME_THRESHOLD = 1#change
 AUDIO_FFT_THRESHOLD = 10#change
-AUDIO_TIME_THRESHOLD = 0.005#change
+AUDIO_TIME_THRESHOLD = 0.02#change
 
 length = 50
 offset = 25
@@ -214,7 +216,7 @@ print(left_audio.audio.shape[0], right_audio.audio.shape[0], audio_length)
 while left_sensor_index + length < len(left_sensor.time) and right_sensor_index + length < len(right_sensor.time):
     left_audio_index = int((left_sensor.time[left_sensor_index] - left_sensor.time[left_sensor_start]) * AUDIO_FREQ) + left_audio_start
     right_audio_index = int((right_sensor.time[right_sensor_index] - right_sensor.time[right_sensor_start]) * AUDIO_FREQ) + right_audio_start
-    print(left_sensor_index, right_sensor_index, left_audio_index, right_audio_index)
+    # print(left_sensor_index, right_sensor_index, left_audio_index, right_audio_index)
     if left_audio_index + audio_length > left_audio.audio.shape[0] or right_audio_index + audio_length > right_audio.audio.shape[0]:
         print(left_audio.audio.shape[0], right_audio.audio.shape[0], audio_length)
         print('out of bound')
@@ -237,7 +239,7 @@ while left_sensor_index + length < len(left_sensor.time) and right_sensor_index 
         cover_array.append(0)
     
     #2. sensor freq series
-    print(left_sensor_segment.shape, right_sensor_segment.shape)
+    # print(left_sensor_segment.shape, right_sensor_segment.shape)
     left_data_fft = np.zeros(left_sensor_segment.shape)
     right_data_fft = np.zeros(right_sensor_segment.shape)
     for i in range(3):
@@ -253,7 +255,7 @@ while left_sensor_index + length < len(left_sensor.time) and right_sensor_index 
     bucket_tot_right.append(right_bucket)
     is_sensor_freq_peak = False
     for j in range(3):
-        print(left_bucket[j][1], right_bucket[j][1])
+        # print(left_bucket[j][1], right_bucket[j][1])
         if left_bucket[j][1] > SENSOR_FFT_THRESHOLD or right_bucket[j][1] > SENSOR_FFT_THRESHOLD:#change 现在取的是5-15hz的能量值判断。
             is_sensor_freq_peak = True
             break
@@ -264,7 +266,7 @@ while left_sensor_index + length < len(left_sensor.time) and right_sensor_index 
         fft_cover_array.append(0)
     
     #3. audio time series
-    is_audio_time_peak = False
+    is_audio_time_peak = True
     if np.max(np.fabs(left_audio_segment)) > AUDIO_TIME_THRESHOLD or np.max(np.fabs(right_audio_segment)) > AUDIO_TIME_THRESHOLD:#change
         is_audio_time_peak = True
         audio_cover_array.append(1)
@@ -332,7 +334,7 @@ while left_sensor_index + length < len(left_sensor.time) and right_sensor_index 
     left_sensor_index = left_sensor_index + int(length/2)
     right_sensor_index = right_sensor_index + int(length/2)
     if abs(left_sensor.time[left_sensor_index] - right_sensor.time[right_sensor_index]) > 0.01:
-        print('start_time: ', left_sensor_index, left_sensor.time[left_sensor_index], right_sensor_index, right_sensor.time[right_sensor_index])
+        # print('start_time: ', left_sensor_index, left_sensor.time[left_sensor_index], right_sensor_index, right_sensor.time[right_sensor_index])
         while abs(left_sensor.time[left_sensor_index] - right_sensor.time[right_sensor_index]) > 0.01:
             if left_sensor.time[left_sensor_index] < right_sensor.time[right_sensor_index]:
                 left_sensor_index = left_sensor_index + 1
@@ -363,10 +365,9 @@ plt.show()
 
 
 if ready_for_save:
-    index = [5,5,5,5,5]
     save_start = 0
     for i in range(5):
-        print(save_start, save_start+index[i])
-        np.save('training/sound_final/rj/' + str(order_index) + '/' + order_list[i] + '_np', store_data_list[save_start : save_start+index[i]])
-        save_start = save_start + index[i]
+        print(save_start, save_start+save_index[i])
+        np.save('training/sound_final/yyw/' + str(order_index) + '/' + order_list[i] + '_np', store_data_list[save_start : save_start+save_index[i]])
+        save_start = save_start + save_index[i]
 

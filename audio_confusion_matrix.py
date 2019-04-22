@@ -75,7 +75,7 @@ def plot_confusion_matrix(cm, classes,
 
 #################data upload
 
-suffixes = ['hbj/', 'lyq/', 'yzc/', 'rj/']
+suffixes = ['hbj/', 'lyq/', 'yzc/', 'rj/', 'fjy/', 'yyk/']
 
 accuracy_score_set = []
 

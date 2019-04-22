@@ -4,7 +4,7 @@ import numpy as np
 gestures_list = []
 gestures_type = []
 
-rootdir = 'training/sound_final/rj/'
+rootdir = 'training/sound_final/yyw/'
 for i in range(20):
     list = os.listdir(rootdir+str(i)+'/') #列出文件夹下所有的目录与文件
     print(list)
@@ -15,7 +15,8 @@ for i in range(20):
         if gesture_type in gestures_type:
             index = gestures_type.index(gesture_type)
             print(gestures_list[index].shape, data.shape)
-            gestures_list[index] = np.concatenate((gestures_list[index], data))
+            if data.shape[0] != 0:
+                gestures_list[index] = np.concatenate((gestures_list[index], data))
             print(gestures_list[index].shape)
         else:
             gestures_type.append(gesture_type)
