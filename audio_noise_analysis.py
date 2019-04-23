@@ -12,11 +12,11 @@ is_single_display_on = False
 ready_for_save = True
 
 #initialize
-left_sensor = Process('data/sound_final/lyq/log-20190415-104307-WatchL.txt')
+left_sensor = Process('data/sound_final/swn/log-20190422-170557-WatchL.txt')
 left_sensor.read_data()
 left_sensor.preprocess_timing_gap()
 # left_sensor.show_single_plot()
-right_sensor = Process('data/sound_final/lyq/log-20190415-104307-WatchR.txt')
+right_sensor = Process('data/sound_final/swn/log-20190422-170557-WatchR.txt')
 right_sensor.read_data()
 right_sensor.preprocess_timing_gap()
 # right_sensor.show_single_plot()
@@ -24,10 +24,10 @@ right_sensor.preprocess_timing_gap()
 TIMING_DIFF = left_sensor.time[0] - right_sensor.time[0]
 right_sensor.time = [time+TIMING_DIFF for time in right_sensor.time]
 
-left_audio = AudioProcess('data/sound_final/lyq/log-20190415-104307-WatchL.wav')
+left_audio = AudioProcess('data/sound_final/swn/log-20190422-170557-WatchL.wav')
 left_audio.frequency_transform()
 left_audio.mfcc_transform()
-right_audio = AudioProcess('data/sound_final/lyq/log-20190415-104307-WatchR.wav')
+right_audio = AudioProcess('data/sound_final/swn/log-20190422-170557-WatchR.wav')
 right_audio.frequency_transform()
 right_audio.mfcc_transform()
 
@@ -44,11 +44,11 @@ left_sensor_start = 0
 right_sensor_start = 0
 left_audio_start = 0
 right_audio_start = 0
-is_autoalign = False#change
+is_autoalign = True#change
 #auto align
 if is_autoalign:
     autoalign_threshold_sensor = 4#change
-    autoalign_threshold_audio = 0.4#change
+    autoalign_threshold_audio = 0.2#change
     for unit_index in range(len(left_sensor.time)):
         unit = left_sensor.data['acc'][unit_index]
         if np.max(np.fabs(unit)) > autoalign_threshold_sensor:
@@ -222,5 +222,5 @@ while gesture_count < 50:
         plt.show()
 
 print(len(store_data_list))
-np.save('training/sound_final/lyq/combination/noise_np', store_data_list)
+np.save('training/sound_final/swn/combination/noise_np', store_data_list)
 

@@ -42,7 +42,7 @@ def isAtt(k):
 
 #################data upload
 
-suffixes = ['hbj/', 'lyq/', 'yzc/', 'rj/', 'fjy/', 'yyk/', 'yyw/']
+suffixes = ['hbj/', 'lyq/', 'yzc/', 'rj/', 'fjy/', 'yyk/', 'yyw/', 'swn/']
 
 accuracy_score_set = []
 
@@ -72,6 +72,30 @@ print(len(motion_type), motion_type)
 type_array format = [[t1d1, t1d2, t1d3...], [t2d1, t2d2, t2d3...], [t3d1...]]
 '''
 
+#####################display to see manually
+
+# for i in range(len(type_array)):
+#     print('motion:', motion_type[i])
+#     for j in range(len(type_array[i])):
+#         print('user ', suffixes[j])
+#         primitive_data = type_array[i][j]
+#         data_length = primitive_data.shape[0]
+#         for k in range(data_length):
+#             segment = primitive_data[k]
+#             sensor_length = 1000
+#             audio_length = 22050
+#             data_unit = segment[0 : sensor_length].reshape(50, 20)
+#             audio_left = segment[sensor_length : sensor_length+audio_length]
+#             audio_right = segment[sensor_length+audio_length : sensor_length+2*audio_length]
+#             fig, axs = plt.subplots(5, 1)
+#             for j in range(3):
+#                 axs[j].plot(range(50), data_unit[:, j], range(50), data_unit[:, 10+j])
+#             axs[3].plot(audio_left)
+#             axs[4].plot(audio_right)
+#             plt.show()
+#             if i == 5:
+#                 break
+
 #####################feature process
 feature_array = []
 
@@ -85,9 +109,9 @@ for i in range(len(type_array)):
         bound = 26
         feature_length = 80
         featured_data = np.zeros((data_length, feature_length))
-        for j in range(data_length):
-            segment = primitive_data[j]
-            featured_data[j] = feature_extraction_new(segment)
+        for k in range(data_length):
+            segment = primitive_data[k]
+            featured_data[k] = feature_extraction_new(segment)
         print(featured_data.shape)
         feature_array[i].append(featured_data)
 
@@ -119,26 +143,6 @@ print(np.array(type_flag).shape)
 
 for i in range(len(suffixes)):
 
-    #####################display to see manually
-
-    # for data in type_array:
-    #     print(data.shape)
-    #     for i in range(data.shape[0]):
-    #         segment = data[i]
-    #         data_unit = segment[0:900].reshape(50, 18)
-    #         audio_left = segment[900:900+22050]
-    #         audio_right = segment[900+22050:900+44100]
-    #         fig, axs = plt.subplots(5, 1)
-    #         for j in range(3):
-    #             axs[j].plot(range(50), data_unit[:, j], range(50), data_unit[:, 9+j])
-    #         axs[3].plot(audio_left)
-    #         axs[4].plot(audio_right)
-    #         plt.show()
-    #         if i == 5:
-    #             break        
-
-    # exit(0)
-  
     #concatenate
     flag_set = []
     predict_flag_set = []

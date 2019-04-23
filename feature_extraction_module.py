@@ -9,7 +9,7 @@ import os
 import time
 from scipy.fftpack import fft,ifft
 from scipy.misc import electrocardiogram
-from scipy.signal import find_peaks
+from scipy.signal import find_peaks, filtfilt, butter
 from scipy.stats import entropy
 from scipy import signal
 import sys
@@ -208,6 +208,25 @@ def feature_extraction_new(segment):
     data_unit = segment[0 : sensor_length].reshape(50, 20)
     audio_left = segment[sensor_length : sensor_length+audio_length]
     audio_right = segment[sensor_length+audio_length : sensor_length+2*audio_length]
+    
+    fig, axs = plt.subplots(5, 2)
+    for j in range(3):
+        axs[j][0].plot(range(50), data_unit[:, j], range(50), data_unit[:, 10+j])
+    axs[3][0].plot(audio_left)
+    axs[4][0].plot(audio_right)
+    b, a = butter(10, 10, btype='hp', fs=100, analog=False, output='ba')
+    for j in range(3):
+        data_unit[:, j] = filtfilt(b, a, data_unit[:, j])
+        data_unit[:, 10+j] = filtfilt(b, a, data_unit[:, 10+j])
+    b, a = butter(10, 0.1, btype='hp', analog=False, output='ba')
+    audio_left = filtfilt(b, a, audio_left)
+    audio_right = filtfilt(b, a, audio_right)
+    for j in range(3):
+        axs[j][1].plot(range(50), data_unit[:, j], range(50), data_unit[:, 10+j])
+    axs[3][1].plot(audio_left)
+    axs[4][1].plot(audio_right)
+    plt.show()
+
     # freq_audio_left = np.array(abs(fft(audio_left)))
     # freq_audio_right = np.array(abs(fft(audio_right)))
 
@@ -227,11 +246,11 @@ def feature_extraction_new(segment):
     # data_unit[:, 6:10] = sub_qua
 
     ##############normalize acc & rot
-    index_start = [0, 3, 10, 13]
-    for i in index_start:
-        sub_data_unit = data_unit[:, i:i+3]
-        sub_norm = np.linalg.norm(sub_data_unit)
-        data_unit[:, i:i+3] = sub_data_unit / sub_norm
+    # index_start = [0, 3, 10, 13]
+    # for i in index_start:
+    #     sub_data_unit = data_unit[:, i:i+3]
+    #     sub_norm = np.linalg.norm(sub_data_unit)
+    #     data_unit[:, i:i+3] = sub_data_unit / sub_norm
 
     feature_offset = 0
     for k in range(20):
