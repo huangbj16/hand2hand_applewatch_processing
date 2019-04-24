@@ -12,11 +12,11 @@ is_single_display_on = False
 ready_for_save = True
 
 #initialize
-left_sensor = Process('data/sound_final/swn/log-20190422-170557-WatchL.txt')
+left_sensor = Process('data/sound_final/lgh/log-20190423-174951-WatchL.txt')
 left_sensor.read_data()
 left_sensor.preprocess_timing_gap()
 # left_sensor.show_single_plot()
-right_sensor = Process('data/sound_final/swn/log-20190422-170557-WatchR.txt')
+right_sensor = Process('data/sound_final/lgh/log-20190423-174951-WatchR.txt')
 right_sensor.read_data()
 right_sensor.preprocess_timing_gap()
 # right_sensor.show_single_plot()
@@ -24,10 +24,10 @@ right_sensor.preprocess_timing_gap()
 TIMING_DIFF = left_sensor.time[0] - right_sensor.time[0]
 right_sensor.time = [time+TIMING_DIFF for time in right_sensor.time]
 
-left_audio = AudioProcess('data/sound_final/swn/log-20190422-170557-WatchL.wav')
+left_audio = AudioProcess('data/sound_final/lgh/log-20190423-174951-WatchL.wav')
 left_audio.frequency_transform()
 left_audio.mfcc_transform()
-right_audio = AudioProcess('data/sound_final/swn/log-20190422-170557-WatchR.wav')
+right_audio = AudioProcess('data/sound_final/lgh/log-20190423-174951-WatchR.wav')
 right_audio.frequency_transform()
 right_audio.mfcc_transform()
 
@@ -48,7 +48,7 @@ is_autoalign = True#change
 #auto align
 if is_autoalign:
     autoalign_threshold_sensor = 4#change
-    autoalign_threshold_audio = 0.2#change
+    autoalign_threshold_audio = 0.4#change
     for unit_index in range(len(left_sensor.time)):
         unit = left_sensor.data['acc'][unit_index]
         if np.max(np.fabs(unit)) > autoalign_threshold_sensor:
@@ -75,17 +75,17 @@ if is_autoalign:
         unit = left_audio.audio[unit_index+audio_initial_offset]
         if np.max(np.fabs(unit)) > autoalign_threshold_audio:
             #pick the peak
-            segment = left_audio.audio[unit_index-11025: unit_index+11025]
+            segment = left_audio.audio[unit_index+audio_initial_offset-11025: unit_index+audio_initial_offset+11025]
             segment_index = np.argmax(np.fabs(segment)) % 22050
-            left_audio_start = unit_index + segment_index + 22050
+            left_audio_start = unit_index + audio_initial_offset + segment_index + 22050
             break
     for unit_index in range(len(right_audio.audio)-audio_initial_offset):
         unit = right_audio.audio[unit_index+audio_initial_offset]
         if np.max(np.fabs(unit)) > autoalign_threshold_audio:
             #pick the peak
-            segment = right_audio.audio[unit_index-11025: unit_index+11025]
+            segment = right_audio.audio[unit_index+audio_initial_offset-11025: unit_index+audio_initial_offset+11025]
             segment_index = np.argmax(np.fabs(segment)) % 22050
-            right_audio_start = unit_index + segment_index + 22050
+            right_audio_start = unit_index + audio_initial_offset + segment_index + 22050
             break
 else:
     left_sensor_start = 0
@@ -222,5 +222,5 @@ while gesture_count < 50:
         plt.show()
 
 print(len(store_data_list))
-np.save('training/sound_final/swn/combination/noise_np', store_data_list)
+np.save('training/sound_final/lgh/combination/noise_np', store_data_list)
 

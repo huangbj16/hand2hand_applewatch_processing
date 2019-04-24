@@ -209,23 +209,24 @@ def feature_extraction_new(segment):
     audio_left = segment[sensor_length : sensor_length+audio_length]
     audio_right = segment[sensor_length+audio_length : sensor_length+2*audio_length]
     
-    fig, axs = plt.subplots(5, 2)
-    for j in range(3):
-        axs[j][0].plot(range(50), data_unit[:, j], range(50), data_unit[:, 10+j])
-    axs[3][0].plot(audio_left)
-    axs[4][0].plot(audio_right)
-    b, a = butter(10, 10, btype='hp', fs=100, analog=False, output='ba')
-    for j in range(3):
-        data_unit[:, j] = filtfilt(b, a, data_unit[:, j])
-        data_unit[:, 10+j] = filtfilt(b, a, data_unit[:, 10+j])
-    b, a = butter(10, 0.1, btype='hp', analog=False, output='ba')
-    audio_left = filtfilt(b, a, audio_left)
-    audio_right = filtfilt(b, a, audio_right)
-    for j in range(3):
-        axs[j][1].plot(range(50), data_unit[:, j], range(50), data_unit[:, 10+j])
-    axs[3][1].plot(audio_left)
-    axs[4][1].plot(audio_right)
-    plt.show()
+    #display filtfilt
+    # fig, axs = plt.subplots(5, 2)
+    # for j in range(3):
+    #     axs[j][0].plot(range(50), data_unit[:, j], range(50), data_unit[:, 10+j])
+    # axs[3][0].plot(audio_left)
+    # axs[4][0].plot(audio_right)
+    # b, a = butter(10, 10, btype='hp', fs=100, analog=False, output='ba')
+    # for j in range(3):
+    #     data_unit[:, j] = filtfilt(b, a, data_unit[:, j])
+    #     data_unit[:, 10+j] = filtfilt(b, a, data_unit[:, 10+j])
+    # b, a = butter(10, 0.1, btype='hp', analog=False, output='ba')
+    # audio_left = filtfilt(b, a, audio_left)
+    # audio_right = filtfilt(b, a, audio_right)
+    # for j in range(3):
+    #     axs[j][1].plot(range(50), data_unit[:, j], range(50), data_unit[:, 10+j])
+    # axs[3][1].plot(audio_left)
+    # axs[4][1].plot(audio_right)
+    # plt.show()
 
     # freq_audio_left = np.array(abs(fft(audio_left)))
     # freq_audio_right = np.array(abs(fft(audio_right)))
