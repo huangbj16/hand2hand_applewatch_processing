@@ -4,7 +4,7 @@ import numpy as np
 gestures_list = []
 gestures_type = []
 
-rootdir = 'training/sound_final/lgh/'
+rootdir = 'training/sound_final/ycy/'
 for i in range(20):
     list = os.listdir(rootdir+str(i)+'/') #列出文件夹下所有的目录与文件
     print(list)

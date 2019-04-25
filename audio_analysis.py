@@ -11,19 +11,19 @@ is_display_on = False
 is_single_display_on = False
 ready_for_save = True
 
-save_index = [5,5,5,5,5]
+save_index = [5,5,5,6,5]
 
 order_index = 19
-order_file = open('data/sound_final/lgh/order.txt')
+order_file = open('data/sound_final/ycy/order.txt')
 order_line = order_file.readlines()[int(order_index/2)]
 order_list = order_line.split()[(order_index%2)*5 : ((order_index%2)+1)*5]
 
 #initialize
-left_sensor = Process('data/sound_final/lgh/log-20190423-174854-WatchL.txt')
+left_sensor = Process('data/sound_final/ycy/log-20190424-180446-WatchL.txt')
 left_sensor.read_data()
 left_sensor.preprocess_timing_gap()
 # left_sensor.show_single_plot()
-right_sensor = Process('data/sound_final/lgh/log-20190423-174854-WatchR.txt')
+right_sensor = Process('data/sound_final/ycy/log-20190424-180446-WatchR.txt')
 right_sensor.read_data()
 right_sensor.preprocess_timing_gap()
 # right_sensor.show_single_plot()
@@ -31,10 +31,10 @@ right_sensor.preprocess_timing_gap()
 TIMING_DIFF = left_sensor.time[0] - right_sensor.time[0]
 right_sensor.time = [time+TIMING_DIFF for time in right_sensor.time]
 
-left_audio = AudioProcess('data/sound_final/lgh/log-20190423-174854-WatchL.wav')
+left_audio = AudioProcess('data/sound_final/ycy/log-20190424-180446-WatchL.wav')
 left_audio.frequency_transform()
 left_audio.mfcc_transform()
-right_audio = AudioProcess('data/sound_final/lgh/log-20190423-174854-WatchR.wav')
+right_audio = AudioProcess('data/sound_final/ycy/log-20190424-180446-WatchR.wav')
 right_audio.frequency_transform()
 right_audio.mfcc_transform()
 
@@ -54,8 +54,8 @@ right_audio_start = 0
 is_autoalign = True#change
 #auto align
 if is_autoalign:
-    autoalign_threshold_sensor = 2#change
-    autoalign_threshold_audio = 0.3#change
+    autoalign_threshold_sensor = 3#change
+    autoalign_threshold_audio = 0.5#change
     for unit_index in range(len(left_sensor.time)):
         unit = left_sensor.data['acc'][unit_index]
         if np.max(np.fabs(unit)) > autoalign_threshold_sensor:
@@ -77,7 +77,7 @@ if is_autoalign:
             right_sensor_start = unit_index + int(segment_index / 3) + 50
             break
     #audio offset to ignore the initial noise.
-    audio_initial_offset = 11025
+    audio_initial_offset = 2000
     for unit_index in range(len(left_audio.audio)-audio_initial_offset):
         unit = left_audio.audio[unit_index+audio_initial_offset]
         if np.max(np.fabs(unit)) > autoalign_threshold_audio:
@@ -95,10 +95,10 @@ if is_autoalign:
             right_audio_start = unit_index + audio_initial_offset + segment_index + 22050
             break
 else:
-    left_sensor_start = 282
-    right_sensor_start = 282
-    left_audio_start = 47417 + 44100
-    right_audio_start = 46827 + 44100
+    left_sensor_start = 92+50
+    right_sensor_start = 98+50
+    left_audio_start = 29154+22050
+    right_audio_start = 9441+22050
 
 print('autoalign result: ', left_sensor_start, right_sensor_start, left_audio_start, right_audio_start)
 print('start time: ', left_sensor.time[left_sensor_start], right_sensor.time[right_sensor_start])
@@ -172,9 +172,9 @@ right_audio_index = right_audio_start
 print('detectiondetectiondetectiondetection')
 AUDIO_FREQ = 44100
 SENSOR_FFT_THRESHOLD = 10#change
-SENSOR_TIME_THRESHOLD = 0.8#change
+SENSOR_TIME_THRESHOLD = 1#change
 AUDIO_FFT_THRESHOLD = 10#change
-AUDIO_TIME_THRESHOLD = 0.01#change
+AUDIO_TIME_THRESHOLD = 0.02#change
 
 length = 50
 offset = 25
@@ -368,6 +368,6 @@ if ready_for_save:
     save_start = 0
     for i in range(5):
         print(save_start, save_start+save_index[i])
-        np.save('training/sound_final/lgh/' + str(order_index) + '/' + order_list[i] + '_np', store_data_list[save_start : save_start+save_index[i]])
+        np.save('training/sound_final/ycy/' + str(order_index) + '/' + order_list[i] + '_np', store_data_list[save_start : save_start+save_index[i]])
         save_start = save_start + save_index[i]
 
