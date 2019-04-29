@@ -12,11 +12,11 @@ is_single_display_on = False
 ready_for_save = True
 
 #initialize
-left_sensor = Process('data/sound_final/ycy/log-20190424-180625-WatchL.txt')
+left_sensor = Process('data/sound_final/swipe/hbj-swipe/log-20190429-131630-WatchL.txt')
 left_sensor.read_data()
 left_sensor.preprocess_timing_gap()
 # left_sensor.show_single_plot()
-right_sensor = Process('data/sound_final/ycy/log-20190424-180625-WatchR.txt')
+right_sensor = Process('data/sound_final/swipe/hbj-swipe/log-20190429-131630-WatchR.txt')
 right_sensor.read_data()
 right_sensor.preprocess_timing_gap()
 # right_sensor.show_single_plot()
@@ -24,10 +24,10 @@ right_sensor.preprocess_timing_gap()
 TIMING_DIFF = left_sensor.time[0] - right_sensor.time[0]
 right_sensor.time = [time+TIMING_DIFF for time in right_sensor.time]
 
-left_audio = AudioProcess('data/sound_final/ycy/log-20190424-180625-WatchL.wav')
+left_audio = AudioProcess('data/sound_final/swipe/hbj-swipe/log-20190429-131630-WatchL.wav')
 left_audio.frequency_transform()
 left_audio.mfcc_transform()
-right_audio = AudioProcess('data/sound_final/ycy/log-20190424-180625-WatchR.wav')
+right_audio = AudioProcess('data/sound_final/swipe/hbj-swipe/log-20190429-131630-WatchR.wav')
 right_audio.frequency_transform()
 right_audio.mfcc_transform()
 
@@ -222,5 +222,5 @@ while gesture_count < 50:
         plt.show()
 
 print(len(store_data_list))
-np.save('training/sound_final/ycy/combination/noise_np', store_data_list)
+np.save('training/sound_final/hbj/combination/noise_np', store_data_list)
 
