@@ -75,7 +75,7 @@ def plot_confusion_matrix(cm, classes,
 
 #################data upload
 
-suffixes = ['hbj/', 'lyq/', 'yzc/', 'rj/', 'fjy/', 'yyk/', 'yyw/', 'swn/', 'sy/', 'lgh/']
+suffixes = ['hbj/', 'lyq/', 'yzc/', 'yyk/', 'yyw/', 'swn/', 'sy/', 'lgh/', 'ycy/']
 
 accuracy_score_set = []
 
@@ -86,7 +86,7 @@ for suffix in suffixes:
     rootdir = 'training/sound_final/'+suffix+'combination/'
     list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
     for i in range(0, len(list)):
-        if '6' in list[i] or 'noise' in list[i]:
+        if (not 'swipe' in list[i]) and ('6' in list[i] or '3' in list[i] or '2' in list[i]):
             continue
         path = os.path.join(rootdir,list[i])
         print(path)

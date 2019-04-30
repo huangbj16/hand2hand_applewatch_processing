@@ -42,9 +42,12 @@ def isAtt(k):
 
 #################data upload
 
-suffixes = ['hbj/', 'lyq/', 'yzc/', 'fjy/', 'yyk/', 'yyw/', 'swn/', 'sy/', 'lgh/', 'ycy/']
+suffixes = ['hbj/', 'lyq/', 'yzc/', 'yyk/', 'yyw/', 'swn/', 'sy/', 'lgh/', 'ycy/', 'fjy/']
 
 accuracy_score_set = []
+precision_score_set = []
+recall_score_set = []
+f1_score_set = []
 
 type_array = []
 motion_type = []
@@ -53,7 +56,8 @@ for suffix in suffixes:
     rootdir = 'training/sound_final/'+suffix+'combination/'
     list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
     for i in range(0, len(list)):
-        if '6' in list[i]:
+        excludes = ['6_np.npy', '4_np.npy']
+        if list[i] in excludes:
             continue
         path = os.path.join(rootdir,list[i])
         print(path)
@@ -107,7 +111,7 @@ for i in range(len(type_array)):
         primitive_data = type_array[i][j]
         data_length = primitive_data.shape[0]
         bound = 26
-        feature_length = 52
+        feature_length = 80
         featured_data = np.zeros((data_length, feature_length))
         for k in range(data_length):
             segment = primitive_data[k]
@@ -164,8 +168,14 @@ for i in range(len(suffixes)):
 
     ################use p1 data to predict p2 data
     y_pred = clf.fit(feature_set, flag_set).predict(predict_feature_set)
-    print(accuracy_score(predict_flag_set, y_pred))
+    # print(accuracy_score(predict_flag_set, y_pred))
     accuracy_score_set.append(accuracy_score(predict_flag_set, y_pred))
+    precision_score_set.append(precision_score(predict_flag_set, y_pred, average='weighted'))
+    recall_score_set.append(recall_score(predict_flag_set, y_pred, average='weighted'))
+    f1_score_set.append(f1_score(predict_flag_set, y_pred, average='weighted'))
 
-print(accuracy_score_set)
+print('accuracy:  ', np.mean(accuracy_score_set))
+print('precision: ', np.mean(precision_score_set))
+print('recall:    ', np.mean(recall_score_set))
+print('f1:        ', np.mean(f1_score_set))
 

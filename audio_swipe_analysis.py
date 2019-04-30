@@ -11,19 +11,19 @@ is_display_on = False
 is_single_display_on = False
 ready_for_save = True
 
-save_index = [5,5,5,5,6,5]
+save_index = [5,5,7,4,5,5]
 
 order_index = 9
-order_file = open('data/sound_final/swipe/sy-swipe/order2.txt')
+order_file = open('data/sound_final/swipe/yzc-swipe/order2.txt')
 order_line = order_file.readlines()[order_index]
 order_list = order_line.split()
 
 #initialize
-left_sensor = Process('data/sound_final/swipe/sy-swipe/log-20190423-103158-WatchL.txt')
+left_sensor = Process('data/sound_final/swipe/yzc-swipe/log-20190423-150658-WatchL.txt')
 left_sensor.read_data()
 left_sensor.preprocess_timing_gap()
 # left_sensor.show_single_plot()
-right_sensor = Process('data/sound_final/swipe/sy-swipe/log-20190423-103158-WatchR.txt')
+right_sensor = Process('data/sound_final/swipe/yzc-swipe/log-20190423-150658-WatchR.txt')
 right_sensor.read_data()
 right_sensor.preprocess_timing_gap()
 # right_sensor.show_single_plot()
@@ -31,10 +31,10 @@ right_sensor.preprocess_timing_gap()
 TIMING_DIFF = left_sensor.time[0] - right_sensor.time[0]
 right_sensor.time = [time+TIMING_DIFF for time in right_sensor.time]
 
-left_audio = AudioProcess('data/sound_final/swipe/sy-swipe/log-20190423-103158-WatchL.wav')
+left_audio = AudioProcess('data/sound_final/swipe/yzc-swipe/log-20190423-150658-WatchL.wav')
 left_audio.frequency_transform()
 left_audio.mfcc_transform()
-right_audio = AudioProcess('data/sound_final/swipe/sy-swipe/log-20190423-103158-WatchR.wav')
+right_audio = AudioProcess('data/sound_final/swipe/yzc-swipe/log-20190423-150658-WatchR.wav')
 right_audio.frequency_transform()
 right_audio.mfcc_transform()
 
@@ -95,10 +95,10 @@ if is_autoalign:
             right_audio_start = unit_index + audio_initial_offset + segment_index + 22050
             break
 else:
-    left_sensor_start = 252+50
-    right_sensor_start = 243+50
-    left_audio_start = 99593+22050
-    right_audio_start = 95422+22050
+    left_sensor_start = 86+50
+    right_sensor_start = 92+50
+    left_audio_start =  26552+22050
+    right_audio_start = 5703+22050
 
 print('autoalign result: ', left_sensor_start, right_sensor_start, left_audio_start, right_audio_start)
 print('start time: ', left_sensor.time[left_sensor_start], right_sensor.time[right_sensor_start])
@@ -171,8 +171,8 @@ right_audio_index = right_audio_start
 #detection
 print('detectiondetectiondetectiondetection')
 AUDIO_FREQ = 44100
-SENSOR_FFT_THRESHOLD = 2#change
-SENSOR_TIME_THRESHOLD = 0.04#change
+SENSOR_FFT_THRESHOLD = 3#change
+SENSOR_TIME_THRESHOLD = 0.03#change
 AUDIO_FFT_THRESHOLD = 10#change
 AUDIO_TIME_THRESHOLD = 0.02#change
 
@@ -367,9 +367,9 @@ plt.show()
 
 
 if ready_for_save:
-    save_start = 0
+    save_start = 1
     for i in range(6):
         print(save_start, save_start+save_index[i])
-        np.save('training/sound_final/sy/swipe_' + str(order_index) + '/' + order_list[i] + '_np', store_data_list[save_start : save_start+save_index[i]])
+        np.save('training/sound_final/yzc/swipe_' + str(order_index) + '/' + order_list[i] + '_np', store_data_list[save_start : save_start+save_index[i]])
         save_start = save_start + save_index[i]
 
