@@ -7,35 +7,41 @@ import matplotlib.pyplot as plt
 
 print(n_categories)
 print('categories: ', all_categories)
-
+ 
 #const number
 n_seqlen = 50
 n_inputsize = 20
 n_hidden = 128
 n_epochs = 2000
 learning_rate = 0.1 # If you set this too high, it might explode. If too low, it might not learn
+n_freq_in = 2000
+n_freq_out = 128
 
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         self.lstm = nn.LSTM(n_inputsize, n_hidden, batch_first = True)
-        self.fc = nn.Linear(n_hidden, n_categories)
+        self.fc_freq = nn.Linear(n_freq_in, n_freq_out)
+        self.fc = nn.Linear(n_hidden+n_freq_out, n_categories)
         self.logsoftmax = nn.LogSoftmax()
 
     def forward(self, x):
-        # print(x.shape)
+        y = x[:, 1000:3000]
+        x = x[:, 0:1000]
+        x = x.reshape(-1, 50, 20)
+        
         x = torch.from_numpy(x.astype('float32'))
         x, (hn, cn) = self.lstm(x)
-        x = x[:, -1, :]
-        x = x.view(-1, 1, n_hidden)
-        # print(x.shape)
-        # 取最后一个数据
+        x = torch.max(x, dim = 1)[0]
+
+        y = torch.from_numpy(y.astype('float32'))
+        y = self.fc_freq(y)
+        # print(x.shape, y.shape)
+        x = torch.cat((x, y), 1)
         x = self.fc(x)
         x = x.view(-1, n_categories)
-        # print(x.shape)
         x = self.logsoftmax(x)
-        # print(x.shape)
-        return x # 11 dims
+        return x
 
 net = Net()
 optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate)
@@ -63,8 +69,6 @@ for epoch in range(n_epochs):
     seed = int(time.time()*10000000) % 19980608
     epoch_X_train, epoch_X_test, epoch_y_train, epoch_y_test = train_test_split(X_train, y_train, test_size=0.9, random_state=seed)
     # 训练
-    epoch_X_train = epoch_X_train.reshape(-1, 50, 20)
-
     output = net(epoch_X_train)
 
     epoch_y_train = torch.LongTensor(epoch_y_train)
@@ -76,8 +80,7 @@ for epoch in range(n_epochs):
     if epoch % 10 == 0:
 
         #验证
-        X_valid = X_train.reshape(-1, 50, 20)
-        output = net(X_valid)
+        output = net(X_train)
         count = 0
         for i in range(y_train.shape[0]):
             if y_train[i] == np.argmax(output.data.numpy()[i]):
@@ -85,7 +88,6 @@ for epoch in range(n_epochs):
         print(count/y_train.shape[0])
         valid_result.append(count/y_train.shape[0])
         #测试
-        X_test = X_test.reshape(-1, 50, 20)
         output = net(X_test)
         count = 0
         for i in range(y_test.shape[0]):

@@ -42,7 +42,8 @@ def isAtt(k):
 
 #################data upload
 
-suffixes = ['hbj/', 'lyq/', 'yzc/', 'yyk/', 'yyw/', 'swn/', 'sy/', 'lgh/', 'ycy/', 'fjy/']
+suffixes = ['hbj/', 'lyq/', 'yzc/', 'yyk/', 'yyw/', 'swn/', 'sy/', 'lgh/', 'ycy/']
+# suffixes = ['hbj/', 'lyq/']
 
 accuracy_score_set = []
 precision_score_set = []
@@ -128,7 +129,7 @@ print(np.array(feature_array).shape)
 #     index_user = 0
 #     for data_unit in featured_data:
 #         for segment in data_unit:
-#             axs[index_user][index].plot(segment[0:12])
+#             axs[index_user][index].plot(segment)
 #         index_user = index_user + 1
 #     index = index + 1
 # # plt.setp(axs, ylim=(-10, 10))
@@ -168,14 +169,24 @@ for i in range(len(suffixes)):
 
     ################use p1 data to predict p2 data
     y_pred = clf.fit(feature_set, flag_set).predict(predict_feature_set)
+    # print(y_pred.shape, predict_flag_set.shape)
+    y_pred_temp = []
+    predict_flag_set_temp = []
+    for j in range(y_pred.shape[0]):
+        if predict_flag_set[j] != 8:
+            predict_flag_set_temp.append(predict_flag_set[j])
+            y_pred_temp.append(y_pred[j])
+    y_pred = np.array(y_pred_temp)
+    predict_flag_set = np.array(predict_flag_set_temp)
+    print(y_pred, predict_flag_set)
     # print(accuracy_score(predict_flag_set, y_pred))
     accuracy_score_set.append(accuracy_score(predict_flag_set, y_pred))
     precision_score_set.append(precision_score(predict_flag_set, y_pred, average='weighted'))
     recall_score_set.append(recall_score(predict_flag_set, y_pred, average='weighted'))
     f1_score_set.append(f1_score(predict_flag_set, y_pred, average='weighted'))
 
-print('accuracy:  ', np.mean(accuracy_score_set))
-print('precision: ', np.mean(precision_score_set))
-print('recall:    ', np.mean(recall_score_set))
-print('f1:        ', np.mean(f1_score_set))
+print('accuracy:  ', np.mean(accuracy_score_set), accuracy_score_set)
+print('precision: ', np.mean(precision_score_set), precision_score_set)
+print('recall:    ', np.mean(recall_score_set), recall_score_set)
+print('f1:        ', np.mean(f1_score_set), f1_score_set)
 

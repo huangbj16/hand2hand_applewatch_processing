@@ -12,11 +12,11 @@ is_single_display_on = False
 ready_for_save = True
 
 #initialize
-left_sensor = Process('data/sound_final/swipe/hbj-swipe/log-20190429-131630-WatchL.txt')
+left_sensor = Process('data/sound_final/yzc/log-20190416-094512-WatchL.txt')
 left_sensor.read_data()
 left_sensor.preprocess_timing_gap()
 # left_sensor.show_single_plot()
-right_sensor = Process('data/sound_final/swipe/hbj-swipe/log-20190429-131630-WatchR.txt')
+right_sensor = Process('data/sound_final/yzc/log-20190416-094512-WatchR.txt')
 right_sensor.read_data()
 right_sensor.preprocess_timing_gap()
 # right_sensor.show_single_plot()
@@ -24,10 +24,10 @@ right_sensor.preprocess_timing_gap()
 TIMING_DIFF = left_sensor.time[0] - right_sensor.time[0]
 right_sensor.time = [time+TIMING_DIFF for time in right_sensor.time]
 
-left_audio = AudioProcess('data/sound_final/swipe/hbj-swipe/log-20190429-131630-WatchL.wav')
+left_audio = AudioProcess('data/sound_final/yzc/log-20190416-094512-WatchL.wav')
 left_audio.frequency_transform()
 left_audio.mfcc_transform()
-right_audio = AudioProcess('data/sound_final/swipe/hbj-swipe/log-20190429-131630-WatchR.wav')
+right_audio = AudioProcess('data/sound_final/yzc/log-20190416-094512-WatchR.wav')
 right_audio.frequency_transform()
 right_audio.mfcc_transform()
 
@@ -88,10 +88,10 @@ if is_autoalign:
             right_audio_start = unit_index + audio_initial_offset + segment_index + 22050
             break
 else:
-    left_sensor_start = 0
-    right_sensor_start = 0
-    left_audio_start = 0
-    right_audio_start = 0
+    left_sensor_start = 50
+    right_sensor_start = 50
+    left_audio_start = 22050
+    right_audio_start = 22050
 
 print('autoalign result: ', left_sensor_start, right_sensor_start, left_audio_start, right_audio_start)
 print('start time: ', left_sensor.time[left_sensor_start], right_sensor.time[right_sensor_start])
@@ -135,12 +135,12 @@ if is_display_on:
 
 #############display
 #transform to frequency field by fft(sample n = 50 -> 50Hz, peek frequency = 20Hz, enough)
-left_sensor.frequency_transform()
-if is_display_on:
-    left_sensor.frequency_bucket_show()
-right_sensor.frequency_transform()
-if is_display_on:
-    right_sensor.frequency_bucket_show()
+# left_sensor.frequency_transform()
+# if is_display_on:
+#     left_sensor.frequency_bucket_show()
+# right_sensor.frequency_transform()
+# if is_display_on:
+#     right_sensor.frequency_bucket_show()
 #display audio freq
 # fig, axs = plt.subplots(3, 1)
 # axs[0].plot(left_audio.freq_energy_array[:, 0])
@@ -178,7 +178,7 @@ sensor_random_range = min(left_sensor_random_range, right_sensor_random_range)
 
 print('random range: ', sensor_random_range)
 
-while gesture_count < 50:
+while gesture_count < 700:
     offset = random.randint(0, sensor_random_range)
     left_sensor_index = left_sensor_start + offset
     right_sensor_index = right_sensor_start + offset
@@ -222,5 +222,5 @@ while gesture_count < 50:
         plt.show()
 
 print(len(store_data_list))
-np.save('training/sound_final/hbj/combination/noise_np', store_data_list)
+np.save('training/sound_final/yzc/combination/noise_np', store_data_list)
 
