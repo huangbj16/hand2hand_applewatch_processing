@@ -42,92 +42,72 @@ def isAtt(k):
 
 #################data upload
 
-# suffixes = ['hbj/', 'lyq/', 'yzc/', 'yyk/', 'yyw/', 'swn/', 'sy/', 'lgh/', 'ycy/']
-suffixes = ['hbj/', 'lyq/']
+suffixes = ['hbj/', 'lyq/', 'yzc/', 'yyk/', 'yyw/', 'swn/', 'sy/', 'lgh/', 'ycy/']
+# suffixes = ['hbj/', 'lyq/']
 
 accuracy_score_set = []
 precision_score_set = []
 recall_score_set = []
 f1_score_set = []
 
-type_array = []
-motion_type = []
+type_array = [[], []]
+motion_type = ['noise', 'gesture']
+
 
 for suffix in suffixes:
     rootdir = 'training/sound_final/'+suffix+'combination/'
     list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
+    comb_gestures = []
     for i in range(0, len(list)):
-        excludes = ['4_np.npy', 'noise_np.npy']
+        excludes = ['4_np.npy', '6_np.npy']
         if list[i] in excludes:
             continue
         path = os.path.join(rootdir,list[i])
         print(path)
         data = np.load(path)
-        print(data.shape)
-        if list[i] in motion_type:
-            mark = motion_type.index(list[i])
-            type_array[mark].append(data)
+        # print(data.shape)
+        if 'noise' in list[i]:
+            type_array[0].append(data)
         else:
-            type_array.append([data])
-            motion_type.append(list[i])
+            choice = np.random.choice(np.arange(data.shape[0]), 5, replace = False)
+            # print(choice)
+            for c in choice:
+                comb_gestures.append(data[c].reshape(1, -1))
+    type_array[1].append(np.concatenate(comb_gestures))
 
-print(len(motion_type), motion_type)
+# print(len(motion_type), motion_type)
+# for array in type_array:
+#     for data in array:
+#         print(data.shape)
+
+# exit(0)
 
 '''
 type_array format = [[t1d1, t1d2, t1d3...], [t2d1, t2d2, t2d3...], [t3d1...]]
 '''
-
-#####################display to see manually
-
-# for i in range(len(type_array)):
-#     print('motion:', motion_type[i])
-#     for j in range(len(type_array[i])):
-#         print('user ', suffixes[j])
-#         primitive_data = type_array[i][j]
-#         data_length = primitive_data.shape[0]
-#         for k in range(data_length):
-#             segment = primitive_data[k]
-#             sensor_length = 1000
-#             audio_length = 22050
-#             data_unit = segment[0 : sensor_length].reshape(50, 20)
-#             audio_left = segment[sensor_length : sensor_length+audio_length]
-#             audio_right = segment[sensor_length+audio_length : sensor_length+2*audio_length]
-#             fig, axs = plt.subplots(5, 1)
-#             for j in range(3):
-#                 axs[j].plot(range(50), data_unit[:, j], range(50), data_unit[:, 10+j])
-#             axs[3].plot(audio_left)
-#             axs[4].plot(audio_right)
-#             plt.show()
-#             if i == 5:
-#                 break
 
 #####################feature process
 feature_array = []
 
 for i in range(len(type_array)):
     feature_array.append([])
-    if not ('3' in motion_type[i] or '8' in motion_type[i]):
-        continue
     print('feature of ', motion_type[i])
     for j in range(len(type_array[i])):
         print('user ', suffixes[j])
         primitive_data = type_array[i][j]
         data_length = primitive_data.shape[0]
-        bound = 26
-        feature_length = 52+40
+        feature_length = 80
         featured_data = np.zeros((data_length, feature_length))
         for k in range(data_length):
             segment = primitive_data[k]
             featured_data[k] = feature_extraction_new(segment)
-            #for stft
-            if k == 2:
-                break
-        print(featured_data.shape)
         feature_array[i].append(featured_data)
 
-print(np.array(feature_array).shape)
+for array in feature_array:
+    for feature in array:
+        print(feature.shape)
 
-exit(0)
+# exit(0)
 
 ##################display
 # fig, axs = plt.subplots(len(suffixes), len(feature_array))
@@ -177,15 +157,6 @@ for i in range(len(suffixes)):
     ################use p1 data to predict p2 data
     y_pred = clf.fit(feature_set, flag_set).predict(predict_feature_set)
     # print(y_pred.shape, predict_flag_set.shape)
-    y_pred_temp = []
-    predict_flag_set_temp = []
-    for j in range(y_pred.shape[0]):
-        if predict_flag_set[j] != 8:
-            predict_flag_set_temp.append(predict_flag_set[j])
-            y_pred_temp.append(y_pred[j])
-    y_pred = np.array(y_pred_temp)
-    predict_flag_set = np.array(predict_flag_set_temp)
-    print(y_pred, predict_flag_set)
     # print(accuracy_score(predict_flag_set, y_pred))
     accuracy_score_set.append(accuracy_score(predict_flag_set, y_pred))
     # precision_score_set.append(precision_score(predict_flag_set, y_pred, average='weighted'))
@@ -193,7 +164,7 @@ for i in range(len(suffixes)):
     # f1_score_set.append(f1_score(predict_flag_set, y_pred, average='weighted'))
 
 print('accuracy:  ', np.mean(accuracy_score_set), accuracy_score_set)
-print('precision: ', np.mean(precision_score_set), precision_score_set)
-print('recall:    ', np.mean(recall_score_set), recall_score_set)
-print('f1:        ', np.mean(f1_score_set), f1_score_set)
+# print('precision: ', np.mean(precision_score_set), precision_score_set)
+# print('recall:    ', np.mean(recall_score_set), recall_score_set)
+# print('f1:        ', np.mean(f1_score_set), f1_score_set)
 
