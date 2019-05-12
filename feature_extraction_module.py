@@ -16,6 +16,39 @@ import sys
 sys.path.append('/')
 from python_audio_feature import mfcc
 from lyq_quaternion_qua import delta_qua
+# from tf.transformations import euler_from_quaternion
+import math
+
+def euler_from_quaternion(qua):
+    sinr_cosp = 2.0*(qua[0]*qua[1]+qua[2]*qua[3])
+    cosr_cosp = 1 - 2.0*(qua[1]*qua[1]+qua[2]*qua[2])
+    roll = math.atan2(sinr_cosp, cosr_cosp)
+
+    sinp = 2.0*(qua[0]*qua[2]-qua[1]*qua[3])
+    pitch = 0
+    if math.fabs(sinp) >= 1:
+        if sinp > 0:
+            pitch = math.pi / 2
+        else:
+            pitch = math.pi / -2
+    else:
+        pitch = math.asin(sinp)
+    
+    siny_cosp = 2.0*(qua[0]*qua[3]+qua[1]*qua[2])
+    cosy_cosp = 1 - 2.0*(qua[2]*qua[2]+qua[3]*qua[3])
+    yaw = math.atan2(siny_cosp, cosy_cosp)
+
+    return [roll, pitch, yaw]
+
+def transform(input_qua):
+    output_euler = np.zeros((input_qua.shape[0], 3))
+    for i in range(input_qua.shape[0]):
+        qua_unit = input_qua[i]
+        att_unit = euler_from_quaternion(qua_unit)
+        output_euler[i][0] = att_unit[0]
+        output_euler[i][1] = att_unit[1]
+        output_euler[i][2] = att_unit[2]
+    return output_euler
 
 def isRot(k):
     if k >= 6 and k < 9:
@@ -200,7 +233,7 @@ def feature_extraction_old(segment):
 
 def feature_extraction_new(segment):
     bound = 26
-    feature_length = 52+40
+    feature_length = 48
     featured_unit = np.zeros((feature_length))
 
     sensor_length = 1000
@@ -257,9 +290,20 @@ def feature_extraction_new(segment):
     #     sub_norm = np.linalg.norm(sub_data_unit)
     #     data_unit[:, i:i+3] = sub_data_unit / sub_norm
 
-    feature_offset = 52
-    for k in range(10):
-        data_unit_coor = data_unit[:, k]
+    # left_qua = data_unit[:, 6:10]
+    # right_qua = data_unit[:, 16:20]
+    # left_att = transform(left_qua)
+    # right_att = transform(right_qua)
+
+    data_unit_new = np.zeros((data_unit.shape[0], 12))
+    data_unit_new[:, 0:6] = data_unit[:, 0:6]
+    # data_unit_new[:, 6:8] = left_att[:, 0:2]
+    data_unit_new[:, 6:12] = data_unit[:, 10:16]
+    # data_unit_new[:, 14:16] = right_att[:, 0:2]
+
+    feature_offset = 0
+    for k in range(12):
+        data_unit_coor = data_unit_new[:, k]
         featured_unit[feature_offset + 4*k] = np.min(data_unit_coor)
         featured_unit[feature_offset + 4*k+1] = np.max(data_unit_coor)
         featured_unit[feature_offset + 4*k+2] = np.mean(data_unit_coor)
@@ -321,19 +365,19 @@ def feature_extraction_new(segment):
     #     featured_unit[feature_offset_normalization + 4*k+3] = np.std(data_unit_coor)
 
     ##############feature: mfcc max min mean = : 0.9513677811550152 0.8844984802431611 0.9130699088145896
-    sampling_freq = 44100
-    fft_size = 22050
-    audio_left = audio_left / np.linalg.norm(audio_left)
-    audio_right = audio_right / np.linalg.norm(audio_right)
-    mfcc_left = mfcc(audio_left, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
-    mfcc_right = mfcc(audio_right, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
-    # print(mfcc_left.shape, mfcc_right.shape)
-    # print(np.mean(mfcc_left, axis=0).shape)
-    # exit(0)
-    featured_unit[0:bound] = mfcc_left
-    featured_unit[bound:2*bound] = mfcc_right
-    # featured_unit[0:bound] = np.amax(mfcc_left, axis=0)
-    # featured_unit[bound:2*bound] = np.amax(mfcc_right, axis=0)
+    # sampling_freq = 44100
+    # fft_size = 22050
+    # audio_left = audio_left / np.linalg.norm(audio_left)
+    # audio_right = audio_right / np.linalg.norm(audio_right)
+    # mfcc_left = mfcc(audio_left, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
+    # mfcc_right = mfcc(audio_right, samplerate=sampling_freq, winlen=0.5, winstep=0.25, nfft=fft_size)
+    # # print(mfcc_left.shape, mfcc_right.shape)
+    # # print(np.mean(mfcc_left, axis=0).shape)
+    # # exit(0)
+    # featured_unit[0:bound] = mfcc_left
+    # featured_unit[bound:2*bound] = mfcc_right
+    # # featured_unit[0:bound] = np.amax(mfcc_left, axis=0)
+    # # featured_unit[bound:2*bound] = np.amax(mfcc_right, axis=0)
 
 
     #########feature: stft

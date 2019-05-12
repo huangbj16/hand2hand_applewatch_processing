@@ -53,11 +53,12 @@ f1_score_set = []
 type_array = []
 motion_type = []
 
+excludes = ['4_np.npy', '6_np.npy', 'noise_np.npy']
+
 for suffix in suffixes:
     rootdir = 'training/sound_final/'+suffix+'combination/'
     list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
     for i in range(0, len(list)):
-        excludes = ['4_np.npy', '6_np.npy', 'noise_np.npy']
         if list[i] in excludes:
             continue
         path = os.path.join(rootdir,list[i])
@@ -111,7 +112,7 @@ for i in range(len(type_array)):
         print('user ', suffixes[j])
         primitive_data = type_array[i][j]
         data_length = primitive_data.shape[0]
-        feature_length = 52+40
+        feature_length = 48
         featured_data = np.zeros((data_length, feature_length))
         for k in range(data_length):
             segment = primitive_data[k]
@@ -131,7 +132,7 @@ for array in feature_array:
 #     index_user = 0
 #     for data_unit in featured_data:
 #         for segment in data_unit:
-#             axs[index_user][index].plot(segment)
+#             axs[index_user][index].plot(segment[24:36])
 #         index_user = index_user + 1
 #     index = index + 1
 # # plt.setp(axs, ylim=(-10, 10))
