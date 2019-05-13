@@ -36,7 +36,7 @@ def isAtt(k):
         return False
 
 def plot_confusion_matrix(cm, classes,
-                          normalize=False,
+                          normalize=True,
                           title='Confusion matrix',
                           cmap=plt.cm.Blues):
     """
@@ -52,8 +52,10 @@ def plot_confusion_matrix(cm, classes,
     print(cm)
     
     #clear diagonal values
-    for index in range(len(classes)):
-        cm[index][index] = 0
+    # for index in range(len(classes)):
+    #     cm[index][index] = 0
+
+    # cmap = plt.cm.get_cmap('gray')
 
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
@@ -82,12 +84,14 @@ accuracy_score_set = []
 type_array = []
 motion_type = []
 
+excludes = ['4_np.npy', '6_np.npy', 'noise_np.npy']
+
 for suffix in suffixes:
     rootdir = 'training/sound_final/'+suffix+'combination/'
     list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
     for i in range(0, len(list)):
-        if (not 'swipe' in list[i]) and ('6' in list[i] or '3' in list[i] or '2' in list[i]):
-            continue
+        if list[i] in excludes:
+            continue        
         path = os.path.join(rootdir,list[i])
         print(path)
         data = np.load(path)
@@ -148,8 +152,9 @@ print(np.array(type_flag).shape)
 
 ###################calculate confusion
 
+res_matrix = np.zeros((len(motion_type), len(motion_type)), dtype=np.int)
+
 for i in range(len(suffixes)):
-    res_matrix = np.zeros((len(motion_type), len(motion_type)), dtype=np.int)
     
     #concatenate
     flag_set = []
@@ -179,15 +184,15 @@ for i in range(len(suffixes)):
     np.set_printoptions(precision=2)
     class_names = motion_type
 
-    # Plot non-normalized confusion matrix
-    plt.figure()
-    plot_confusion_matrix(res_matrix, classes=class_names,
-                        title='Confusion matrix, without normalization')
+# Plot non-normalized confusion matrix
+plt.figure()
+plot_confusion_matrix(res_matrix, classes=class_names,
+                    title='Confusion matrix, without normalization')
 
-    # Plot normalized confusion matrix
-    # plt.figure()
-    # plot_confusion_matrix(cnf_matrix, classes=class_names, normalize=True,
-    #                       title='Normalized confusion matrix')
+# Plot normalized confusion matrix
+# plt.figure()
+# plot_confusion_matrix(cnf_matrix, classes=class_names, normalize=True,
+#                       title='Normalized confusion matrix')
 
-    plt.show()
+plt.show()
 

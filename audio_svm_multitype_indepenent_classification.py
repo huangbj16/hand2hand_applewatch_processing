@@ -112,7 +112,7 @@ for i in range(len(type_array)):
         print('user ', suffixes[j])
         primitive_data = type_array[i][j]
         data_length = primitive_data.shape[0]
-        feature_length = 48
+        feature_length = 80
         featured_data = np.zeros((data_length, feature_length))
         for k in range(data_length):
             segment = primitive_data[k]

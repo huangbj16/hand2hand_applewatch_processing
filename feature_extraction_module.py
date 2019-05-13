@@ -233,7 +233,7 @@ def feature_extraction_old(segment):
 
 def feature_extraction_new(segment):
     bound = 26
-    feature_length = 48
+    feature_length = 80
     featured_unit = np.zeros((feature_length))
 
     sensor_length = 1000
@@ -275,14 +275,6 @@ def feature_extraction_new(segment):
     # # plt.setp(axs, ylim=(-20, 20))
     # plt.show()
 
-    ###############calc delta_qua
-    # qua_left = data_unit[:, 6:10]
-    # qua_right = data_unit[:, 16:20]
-    # sub_qua = np.zeros((50, 4), dtype=float)
-    # for i in range(50):
-    #     sub_qua[i] = delta_qua(qua_left[i], qua_right[i])
-    # data_unit[:, 6:10] = sub_qua
-
     ##############normalize acc & rot
     # index_start = [0, 3, 10, 13]
     # for i in index_start:
@@ -290,25 +282,36 @@ def feature_extraction_new(segment):
     #     sub_norm = np.linalg.norm(sub_data_unit)
     #     data_unit[:, i:i+3] = sub_data_unit / sub_norm
 
-    # left_qua = data_unit[:, 6:10]
-    # right_qua = data_unit[:, 16:20]
-    # left_att = transform(left_qua)
-    # right_att = transform(right_qua)
+#########begin
 
-    data_unit_new = np.zeros((data_unit.shape[0], 12))
+    left_qua = data_unit[:, 6:10]
+    right_qua = data_unit[:, 16:20]
+    left_att = transform(left_qua)
+    right_att = transform(right_qua)
+
+    ###############calc delta_qua
+    sub_qua = np.zeros((50, 4), dtype=float)
+    for i in range(50):
+        sub_qua[i] = delta_qua(left_qua[i], right_qua[i])
+
+    data_unit_new = np.zeros((data_unit.shape[0], 20))
     data_unit_new[:, 0:6] = data_unit[:, 0:6]
-    # data_unit_new[:, 6:8] = left_att[:, 0:2]
-    data_unit_new[:, 6:12] = data_unit[:, 10:16]
-    # data_unit_new[:, 14:16] = right_att[:, 0:2]
+    data_unit_new[:, 6:8] = left_att[:, 0:2]
+    data_unit_new[:, 8:14] = data_unit[:, 10:16]
+    data_unit_new[:, 14:16] = right_att[:, 0:2]
+    data_unit_new[:, 16:20] = sub_qua
+
 
     feature_offset = 0
-    for k in range(12):
+    for k in range(20):
         data_unit_coor = data_unit_new[:, k]
         featured_unit[feature_offset + 4*k] = np.min(data_unit_coor)
         featured_unit[feature_offset + 4*k+1] = np.max(data_unit_coor)
         featured_unit[feature_offset + 4*k+2] = np.mean(data_unit_coor)
         featured_unit[feature_offset + 4*k+3] = np.std(data_unit_coor)
     
+############end
+
     ##########calc freq domain feature
     # #acc freq
     # acc_left = data_unit[:, 0:3] / np.linalg.norm(data_unit[:, 0:3])
